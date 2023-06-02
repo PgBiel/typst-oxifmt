@@ -297,9 +297,12 @@ parameter := argument '$'
     }
   }
 
+  // use number prefixes parsed above
+  replacement = sign + hashtag-prefix + replacement
+
   if fill != none {
     // perform fill/width adjustments: "x" ---> "  x" if width is 4
-    let width-diff = width - (replacement.len() + sign.len() + hashtag-prefix.len())  // number prefixes are also considered for width
+    let width-diff = width - replacement.len()  // number prefixes are also considered for width
     if width-diff > 0 {
       if align == left {
         replacement = replacement + (fill * width-diff)
@@ -311,9 +314,6 @@ parameter := argument '$'
       }
     }
   }
-
-  // use number prefixes parsed above
-  replacement = sign + hashtag-prefix + replacement
 
   replacement
 }
