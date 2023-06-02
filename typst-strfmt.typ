@@ -139,6 +139,32 @@
   }
 }
 
+#let _strfmt_display-radix(num, radix, signed: true, lowercase: false) = {
+  let num = int(num)
+  if type(radix) != "integer" or num == 0 or radix <= 1 {
+    return "0"
+  }
+  let sign = if num < 0 and signed { "-" } else { "" }
+  let num = calc.abs(num)
+  let radix = calc.min(radix, 16)
+  let digits = if lowercase {
+    ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f")
+  } else {
+    ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F")
+  }
+  let result = ""
+
+  while (num > 0) {
+    let quot = calc.quo(num, radix)
+    let rem = calc.floor(calc.rem(num, radix))
+    let digit = digits.at(rem)
+    result = digit + result
+    num = quot
+  }
+
+  sign + result
+}
+
 // Parses {format:specslikethis}.
 // Rust's format spec grammar:
 /*
@@ -184,18 +210,24 @@ parameter := argument '$'
   let precision = if precision == none { none } else { int(precision) }
   let hashtag = hashtag == "#"
   let zero = zero == "0"
+  let hashtag-prefix = ""
 
+  let valid-specs = ("", "?", "b", "x", "X", "o", "x?", "X?")
   let spec-error() = {
-    panic("String formatter error: Unknown spec type '" + spectype + "', from '{" + fullname + "}'. Valid options include: ?.")
+    panic("String formatter error: Unknown spec type '" + spectype + "', from '{" + fullname + "}'. Valid options include: '" + valid-specs.join("', '") + "'.")
   }
+  if spectype not in valid-specs {
+    spec-error()
+  }
+
   let is-numeric = _strfmt_is-numeric-type(replacement)
   if is-numeric {
-    if fill == none {
-      if zero and type(replacement) == "integer" {
-        fill = "0"
-      } else {
-        fill = " "
-      }
+    if zero and type(replacement) == "integer" {
+      // disable fill, we will be prefixing with zeroes if necessary
+      fill = none
+    } else if fill == none {
+      fill = " "
+      zero = false
     }
     // default number alignment to right
     if align == none {
@@ -221,28 +253,38 @@ parameter := argument '$'
           replacement += "0" * digits-len-diff
         }
       }
-      // validate anyways (even though we ignore it)
-      if spectype not in ("", "?") {
-        spec-error()
+    } else if type(replacement) == "integer" and spectype in ("x", "X", "b", "o", "x?", "X?") {
+      let radix-map = (x: 16, X: 16, "x?": 16, "X?": 16, b: 2, o: 8)
+      let radix = radix-map.at(spectype)
+      let lowercase = spectype.starts-with("x")
+      replacement = _strfmt_stringify(_strfmt_display-radix(replacement, radix, lowercase: lowercase, signed: false))
+      if hashtag {
+        let hashtag-prefix-map = ("16": "0x", "2": "0b", "8": "0o")
+        hashtag-prefix = hashtag-prefix-map.at(str(radix))
       }
     } else {
       precision = none
-      replacement = if spectype == "?" {
+      replacement = if spectype.ends-with("?") {
         repr(replacement)
-      } else if spectype == "" {
-        _strfmt_stringify(replacement)
       } else {
-        spec-error()
+        _strfmt_stringify(replacement)
+      }
+    }
+    if zero {
+      let width-diff = width - (replacement.len() + sign.len() + hashtag-prefix.len())
+      if width-diff > 0 {  // prefix with the appropriate amount of zeroes
+        replacement = ("0" * width-diff) + replacement
       }
     }
   } else {
     sign = ""
-    replacement = if spectype == "?" {
+    hashtag-prefix = ""
+    hashtag = false
+    zero = false
+    replacement = if spectype.ends-with("?") {
       repr(replacement)
-    } else if spectype == "" {
-      _strfmt_stringify(replacement)
     } else {
-      spec-error()
+      _strfmt_stringify(replacement)
     }
     if fill == none {
       fill = " "
@@ -255,21 +297,23 @@ parameter := argument '$'
     }
   }
 
-  // perform fill/width adjustments: "x" ---> "  x" if width is 4
-  let width-diff = width - replacement.len() - sign.len()  // sign is also considered for width
-  if width-diff > 0 {
-    if align == left {
-      replacement = replacement + (fill * width-diff)
-    } else if align == right {
-      replacement = (fill * width-diff) + replacement
-    } else if align == center {
-      let width-fill = fill * (calc.ceil(float(width-diff) / 2))
-      replacement = width-fill + replacement + width-fill
+  if fill != none {
+    // perform fill/width adjustments: "x" ---> "  x" if width is 4
+    let width-diff = width - (replacement.len() + sign.len() + hashtag-prefix.len())  // number prefixes are also considered for width
+    if width-diff > 0 {
+      if align == left {
+        replacement = replacement + (fill * width-diff)
+      } else if align == right {
+        replacement = (fill * width-diff) + replacement
+      } else if align == center {
+        let width-fill = fill * (calc.ceil(float(width-diff) / 2))
+        replacement = width-fill + replacement + width-fill
+      }
     }
   }
 
-  // use number sign 'parsed' above
-  replacement = sign + replacement
+  // use number prefixes parsed above
+  replacement = sign + hashtag-prefix + replacement
 
   replacement
 }
