@@ -139,6 +139,7 @@
   }
 }
 
+// Parses {format:specslikethis}.
 // Rust's format spec grammar:
 /*
 format_spec := [[fill]align][sign]['#']['0'][width]['.' precision]type
@@ -159,6 +160,7 @@ parameter := argument '$'
   // note: usage of [\s\S] in regex to include all characters, incl. newline
   // (dot format ignores newline)
   let extra-parts = extras.match(
+    //           fill      align    sign   #   0  width    precision     type
     regex("^(?:([\\s\\S])?([<^>]))?([+-])?(#)?(0)?(\\d+)?(?:\\.(\\d+))?([^\\s]*)\\s*$")
   )
   if extra-parts == none {
@@ -183,6 +185,9 @@ parameter := argument '$'
   let hashtag = hashtag == "#"
   let zero = zero == "0"
 
+  let spec-error() = {
+    panic("String formatter error: Unknown spec type '" + spectype + "', from '{" + fullname + "}'. Valid options include: ?.")
+  }
   let is-numeric = _strfmt_is-numeric-type(replacement)
   if is-numeric {
     if fill == none {
@@ -216,7 +221,7 @@ parameter := argument '$'
       }
       // validate anyways (even though we ignore it)
       if spectype not in ("", "?") {
-        panic("String formatter error: Unknown spec type '" + spectype + "' , from '{" + fullname + "}'. Valid options include: ?.")
+        spec-error()
       }
     } else {
       precision = none
@@ -225,7 +230,7 @@ parameter := argument '$'
       } else if spectype == "" {
         _strfmt_stringify(replacement)
       } else {
-        panic("String formatter error: Unknown spec type '" + spectype + "' , from '{" + fullname + "}'. Valid options include: ?.")
+        spec-error()
       }
     }
   } else {
@@ -235,7 +240,7 @@ parameter := argument '$'
     } else if spectype == "" {
       _strfmt_stringify(replacement)
     } else {
-      panic("String formatter error: Unknown spec type '" + spectype + "' , from '{" + fullname + "}'. Valid options include: ?.")
+      spec-error()
     }
     if fill == none {
       fill = " "
