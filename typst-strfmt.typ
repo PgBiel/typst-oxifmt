@@ -196,13 +196,6 @@ parameter := argument '$'
     if align == none {
       align = right
     }
-    if type(replacement) != "integer" {
-      if precision != none {
-        replacement = calc.round(replacement, digits: precision)
-      }
-    } else {
-      precision = none
-    }
     if sign == "+" and replacement >= 0 {
       sign = "+"
     } else if replacement < 0 {
@@ -210,12 +203,30 @@ parameter := argument '$'
     } else {
       sign = ""
     }
-    replacement = if spectype == "?" {
-      repr(replacement)
-    } else if spectype == "" {
-      _strfmt_stringify(replacement)
+    if type(replacement) != "integer" and precision != none {
+      replacement = _strfmt_stringify(calc.round(replacement, digits: calc.min(50, precision)))
+      let digits-match = replacement.match(regex("^\\d+\\.(\\d+)$"))
+      if digits-match != none and digits-match.captures.len() > 0 {
+        let digits = digits-match.captures.first()
+        let digits-len-diff = precision - digits.len()
+        // add missing zeroes for precision
+        if digits-len-diff > 0 {
+          replacement += "0" * digits-len-diff
+        }
+      }
+      // validate anyways (even though we ignore it)
+      if spectype not in ("", "?") {
+        panic("String formatter error: Unknown spec type '" + spectype + "' , from '{" + fullname + "}'. Valid options include: ?.")
+      }
     } else {
-      panic("String formatter error: Unknown spec type '" + spectype + "' , from '{" + fullname + "}'. Valid options include: ?.")
+      precision = none
+      replacement = if spectype == "?" {
+        repr(replacement)
+      } else if spectype == "" {
+        _strfmt_stringify(replacement)
+      } else {
+        panic("String formatter error: Unknown spec type '" + spectype + "' , from '{" + fullname + "}'. Valid options include: ?.")
+      }
     }
   } else {
     sign = ""
