@@ -201,6 +201,8 @@ parameter := argument '$'
     if align == none {
       align = right
     }
+
+    // if + is specified, + will appear before all numbers >= 0.
     if sign == "+" and replacement >= 0 {
       sign = "+"
     } else if replacement < 0 {
@@ -254,7 +256,7 @@ parameter := argument '$'
   }
 
   // perform fill/width adjustments: "x" ---> "  x" if width is 4
-  let width-diff = width - replacement.len()
+  let width-diff = width - replacement.len() - sign.len()  // sign is also considered for width
   if width-diff > 0 {
     if align == left {
       replacement = replacement + (fill * width-diff)
@@ -265,6 +267,9 @@ parameter := argument '$'
       replacement = width-fill + replacement + width-fill
     }
   }
+
+  // use number sign 'parsed' above
+  replacement = sign + replacement
 
   replacement
 }

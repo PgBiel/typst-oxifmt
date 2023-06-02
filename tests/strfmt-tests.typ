@@ -5,5 +5,5 @@
     assert.eq(strfmt("a {} c {} d {:?}", true, "testA", "testA"), "a true c testA d \"testA\"")
     assert.eq(strfmt("a{{}}b ={}{}= c{0}d", false, (a: "55", b: 20.3)), "a{}b =false(a: \"55\", b: 20.3)= cfalsed")
     assert.eq(strfmt("{:08}|{0:<08}|{0:>08}|{0:^08}", 120), "00000120|12000000|00000120|000120000")
-    assert.eq(strfmt("{:a>8}, {:^20.10}", "b", 5.5), "aaaaaaab,     5.5000000000    ")
+    assert.eq(strfmt("{:a>8}, {:^20.10}, {:+05.4}, {}", "b", 5.5, 11, -4), "aaaaaaab,     5.5000000000    , +0011, -4")
 }
