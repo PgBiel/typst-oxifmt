@@ -233,32 +233,32 @@ parameter := argument '$'
       let i = int(pos)
       assert(
         pos-replacements.len() > 0,
-        message: "String formatter error: Attempted to use positional argument " + str(i) + " for " + spec-part-name + ", but no positional arguments were given (from '" + fullname + "')."
+        message: "String formatter error: Attempted to use positional argument " + str(i) + " for " + spec-part-name + ", but no positional arguments were given (from '{" + fullname + "}')."
       )
       assert(
         i >= 0 and i < pos-replacements.len(),
-        message: "String formatter error: Attempted to use positional argument " + str(i) + " for " + spec-part-name + ", but there is no argument at that position (from '" + fullname + "'). Please note that positional arguments start at position 0, and are specified in order after the format string in the 'strfmt' call."
+        message: "String formatter error: Attempted to use positional argument " + str(i) + " for " + spec-part-name + ", but there is no argument at that position (from '{" + fullname + "}'). Please note that positional arguments start at position 0, and are specified in order after the format string in the 'strfmt' call."
       )
       let arg = pos-replacements.at(i)
       assert(
         type(arg) == "integer",
-        message: "String formatter error: Attempted to use positional argument " + str(i) + " for " + spec-part-name + ", but it was a(n) '" + type(arg) + "', not an integer (from '" + fullname + "')."
+        message: "String formatter error: Attempted to use positional argument " + str(i) + " for " + spec-part-name + ", but it was a(n) '" + type(arg) + "', not an integer (from '{" + fullname + "}')."
       )
 
       int(arg)
     } else if named != none {
       assert(
         named-replacements.len() > 0,
-        message: "String formatter error: Attempted to use named argument '" + named + "' for " + spec-part-name + ", but no named arguments were given (from '" + fullname + "')."
+        message: "String formatter error: Attempted to use named argument '" + named + "' for " + spec-part-name + ", but no named arguments were given (from '{" + fullname + "}')."
       )
       assert(
         named in named-replacements,
-        message: "String formatter error: Attempted to use named argument '" + named + "' for " + spec-part-name + ", but there is no argument associated to that name (from '" + fullname + "'). Ensure you pass that argument in the 'strfmt' call, e.g. strfmt(\"format...\", " + named + ": 20)."
+        message: "String formatter error: Attempted to use named argument '" + named + "' for " + spec-part-name + ", but there is no argument associated to that name (from '{" + fullname + "}'). Ensure you pass that argument in the 'strfmt' call, e.g. strfmt(\"format...\", " + named + ": 20)."
       )
       let arg = named-replacements.at(named)
       assert(
         type(arg) == "integer",
-        message: "String formatter error: Attempted to use named argument '" + named + "' for " + spec-part-name + ", but it was a(n) '" + type(arg) + "', not an integer (from '" + fullname + "')."
+        message: "String formatter error: Attempted to use named argument '" + named + "' for " + spec-part-name + ", but it was a(n) '" + type(arg) + "', not an integer (from '{" + fullname + "}')."
       )
 
       int(arg)
