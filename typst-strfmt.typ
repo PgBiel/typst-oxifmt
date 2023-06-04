@@ -215,7 +215,7 @@ parameter := argument '$'
   // (dot format ignores newline)
   let extra-parts = extras.match(
     //           fill      align    sign   #   0     width(from param)      width      precision(from param)    precision  spectype
-    regex("^(?:([\\s\\S])?([<^>]))?([+-])?(#)?(0)?(?:(?:(\\d+)|([^.$]+))\$|(\\d+))?(?:\\.(?:(?:(\\d+)|([^$]+))\$|(\\d+)))?([^\\s]*)\\s*$")
+    regex("^(?:([\\s\\S])?([<^>]))?([+-])?(#)?(0)?(?:(?:(\\d+)|([^.$]+))\$|(\\d+))?(?:\\.(?:(?:(\\d+)|([^$]+))\$|(\\d+|\*)))?([^\\s]*)\\s*$")
   )
   if extra-parts == none {
     panic("String formatter error: Invalid format spec '" + extras + "', from '{" + fullname + "}'. Try escaping the braces { } with {{ }} if you wanted to insert literal braces.")
@@ -265,6 +265,10 @@ parameter := argument '$'
     } else {
       none
     }
+  }
+
+  if precision-lit == "*" {
+    panic("String formater error: Precision specification of type `.*` is not supported yet (from '{" + fullname + "}'). Try specifying your desired precision directly on the format spec, e.g. `.5`, or through some argument, e.g. `.name$` to take it from the 'name' named argument.")
   }
 
   let align = if align == "" {
