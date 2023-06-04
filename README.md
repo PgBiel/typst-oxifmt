@@ -1,8 +1,10 @@
-# typst-strfmt
+# typst-strfmt (v0.1.0)
 
 A Typst library that brings convenient string formatting and interpolation through the `strfmt` function. Its syntax is taken directly from Rust's `format!` syntax, so read its page for more information (https://doc.rust-lang.org/std/fmt/). Only a few things aren't supported from the Rust syntax, such as the `p` (pointer) format type, or the `.*` precision specifier.
 
 I intend to add a few extras over time, though. The first "extra" I've added so far is the `fmt-decimal-separator: "string"` parameter, which lets you customize the decimal separator for decimal numbers (floats) inserted into strings. E.g. `strfmt("Result: {}", 5.8, fmt-decimal-separator: ",")` will return the string `"Result: 5,8"` (comma instead of dot). See more below.
+
+**Compatible with:** [Typst](https://github.com/typst/typst) v0.4.0
 
 ## Usage
 
@@ -74,3 +76,9 @@ parameter := argument '$'
 ```
 
 Note, however, that precision of type `.*` is not supported yet and will raise an error.
+
+## Changelog
+
+### v0.1.0
+
+- Initial release, added `strfmt`.
