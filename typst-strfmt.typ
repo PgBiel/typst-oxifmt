@@ -206,7 +206,7 @@ type := '' | '?' | 'x?' | 'X?' | identifier
 count := parameter | integer
 parameter := argument '$'
 */
-#let _generate-replacement(fullname, extras, replacement) = {
+#let _generate-replacement(fullname, extras, replacement, pos-replacements: (), named-replacements: (:)) = {
   if extras == none {
     return _strfmt_stringify(replacement)
   }
@@ -214,14 +214,58 @@ parameter := argument '$'
   // note: usage of [\s\S] in regex to include all characters, incl. newline
   // (dot format ignores newline)
   let extra-parts = extras.match(
-    //           fill      align    sign   #   0  width    precision     type
-    regex("^(?:([\\s\\S])?([<^>]))?([+-])?(#)?(0)?(\\d+)?(?:\\.(\\d+))?([^\\s]*)\\s*$")
+    //           fill      align    sign   #   0     width(from param)      width      precision(from param)    precision  spectype
+    regex("^(?:([\\s\\S])?([<^>]))?([+-])?(#)?(0)?(?:(?:(\\d+)|([^.$]+))\$|(\\d+))?(?:\\.(?:(?:(\\d+)|([^$]+))\$|(\\d+)))?([^\\s]*)\\s*$")
   )
   if extra-parts == none {
-    panic("String formatter error: Invalid format spec '" + extras + "', from '{" + fullname + "}'.")
+    panic("String formatter error: Invalid format spec '" + extras + "', from '{" + fullname + "}'. Try escaping the braces { } with {{ }} if you wanted to insert literal braces.")
   }
 
-  let (fill, align, sign, hashtag, zero, width, precision, spectype) = extra-parts.captures
+  let (fill, align, sign, hashtag, zero, width-posarg, width-namedarg, width-lit, precision-posarg, precision-namedarg, precision-lit, spectype) = extra-parts.captures
+
+  // 'count' type parameters in the spec (width, precision) can be either a literal number (123),
+  // a number referring to a positional argument (123$), or some text referring to a named argument (abc$).
+  // The final $ is mandatory for the last two cases.
+  let parse-count(lit, pos, named, spec-part-name: "unknown") = {
+    if lit != none {
+      int(lit)
+    } else if pos != none {
+      let i = int(pos)
+      assert(
+        pos-replacements.len() > 0,
+        message: "String formatter error: Attempted to use positional argument " + str(i) + " for " + spec-part-name + ", but no positional arguments were given (from '" + fullname + "')."
+      )
+      assert(
+        i >= 0 and i < pos-replacements.len(),
+        message: "String formatter error: Attempted to use positional argument " + str(i) + " for " + spec-part-name + ", but there is no argument at that position (from '" + fullname + "'). Please note that positional arguments start at position 0, and are specified in order after the format string in the 'strfmt' call."
+      )
+      let arg = pos-replacements.at(i)
+      assert(
+        type(arg) == "integer",
+        message: "String formatter error: Attempted to use positional argument " + str(i) + " for " + spec-part-name + ", but it was a(n) '" + type(arg) + "', not an integer (from '" + fullname + "')."
+      )
+
+      int(arg)
+    } else if named != none {
+      assert(
+        named-replacements.len() > 0,
+        message: "String formatter error: Attempted to use named argument '" + named + "' for " + spec-part-name + ", but no named arguments were given (from '" + fullname + "')."
+      )
+      assert(
+        named in named-replacements,
+        message: "String formatter error: Attempted to use named argument '" + named + "' for " + spec-part-name + ", but there is no argument associated to that name (from '" + fullname + "'). Ensure you pass that argument in the 'strfmt' call, e.g. strfmt(\"format...\", " + named + ": 20)."
+      )
+      let arg = named-replacements.at(named)
+      assert(
+        type(arg) == "integer",
+        message: "String formatter error: Attempted to use named argument '" + named + "' for " + spec-part-name + ", but it was a(n) '" + type(arg) + "', not an integer (from '" + fullname + "')."
+      )
+
+      int(arg)
+    } else {
+      none
+    }
+  }
 
   let align = if align == "" {
     none
@@ -234,15 +278,17 @@ parameter := argument '$'
   } else if align != none {
     panic("String formatter error: Invalid alignment in the format spec: '" + align + "' (must be either '<', '^' or '>').")
   }
+  let width = parse-count(width-lit, width-posarg, width-namedarg, spec-part-name: "width")
   let width = if width == none { 0 } else { int(width) }
-  let precision = if precision == none { none } else { int(precision) }
+  let precision = parse-count(precision-lit, precision-posarg, precision-namedarg, spec-part-name: "precision")
   let hashtag = hashtag == "#"
   let zero = zero == "0"
   let hashtag-prefix = ""
 
   let valid-specs = ("", "?", "b", "x", "X", "o", "x?", "X?", "e", "E")
   let spec-error() = {
-    panic("String formatter error: Unknown spec type '" + spectype + "', from '{" + fullname + "}'. Valid options include: '" + valid-specs.join("', '") + "'.")
+    panic(
+      "String formatter error: Unknown spec type '" + spectype + "', from '{" + fullname + "}'. Valid options include: '" + valid-specs.join("', '") + "'. Maybe you specified some invalid formatting spec syntax (after the ':'), which can also prompt this error. Check the typst-strfmt docs for more information.")
   }
   if spectype not in valid-specs {
     spec-error()
@@ -377,7 +423,7 @@ parameter := argument '$'
         }
         replace-by = named-replacements.at(name)
       }
-      replace-by = _generate-replacement(f.name, extras, replace-by)
+      replace-by = _generate-replacement(f.name, extras, replace-by, pos-replacements: num-replacements, named-replacements: named-replacements)
       replace-span = f.span
     } else {
       panic("String formatter error: Internal error (unexpected format received).")
