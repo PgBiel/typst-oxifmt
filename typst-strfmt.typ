@@ -392,6 +392,7 @@ parameter := argument '$'
 }
 
 #let strfmt(format, ..replacements) = {
+  if format == "" { return "" }
   let formats = _strfmt_formatparser(format)
   let num-replacements = replacements.pos()
   let named-replacements = replacements.named()
