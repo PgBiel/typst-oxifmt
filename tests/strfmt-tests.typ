@@ -36,4 +36,7 @@
 
     // test custom decimal separators (II) - weird values
     assert.eq(strfmt("{}; {:015e}; {}; {}; {:?}", 1.532, 45000, -5.6, "a.b", "c.d", fmt-decimal-separator: (a: 5)), "1(a: 5)532; 000004(a: 5)5e4; -5(a: 5)6; a.b; \"c.d\"")
+
+    // test custom decimal separators (III) - ensure we can fetch it from inside
+    assert.eq(strfmt("5{fmt-decimal-separator}6", fmt-decimal-separator: "|"), "5|6")
 }

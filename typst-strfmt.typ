@@ -401,12 +401,13 @@ parameter := argument '$'
   replacement
 }
 
-#let strfmt(format, ..replacements, fmt-decimal-separator: auto) = {
+#let strfmt(format, ..replacements) = {
   if format == "" { return "" }
   let formats = _strfmt_formatparser(format)
   let num-replacements = replacements.pos()
   let named-replacements = replacements.named()
   let unnamed-format-index = 0
+  let fmt-decimal-separator = if "fmt-decimal-separator" in named-replacements { named-replacements.at("fmt-decimal-separator") } else { auto }
 
   let parts = ()
   let last-span-end = 0
