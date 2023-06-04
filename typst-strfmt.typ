@@ -1,6 +1,6 @@
 #let _strfmt_formatparser(s) = {
   if type(s) != "string" {
-    panic("String format parser given non-string.")
+    panic("String format parsing internal error: String format parser given non-string.")
   }
   let result = ()
   let codepoints = s.codepoints()
@@ -25,13 +25,13 @@
 
   // -- errors --
   let excessive-lbracket() = {
-    panic("String format parsing error: Inserted a second, non-escaped { inside a {format specifier}. Did you forget to insert a } somewhere?")
+    panic("String format parsing error: Inserted a second, non-escaped { inside a {format specifier}. Did you forget to insert a } somewhere, or to escape the { with {{?")
   }
   let excessive-rbracket() = {
-    panic("String format parsing error: Inserted a stray } (doesn't match any { from before). Did you forget to insert a { somewhere?")
+    panic("String format parsing error: Inserted a stray } (doesn't match any { from before). Did you forget to insert a { somewhere, or to escape the } with }}?")
   }
   let missing-rbracket() = {
-    panic("String format parsing error: Reached end of string with an open format specifier {, but without a closing }. Did you forget to insert a right bracket?")
+    panic("String format parsing error: Reached end of string with an open format specifier {, but without a closing }. Did you forget to insert a right bracket, or to escape the { with {{?")
   }
 
   // -- parse loop --
@@ -184,7 +184,7 @@
 }
 
 #let _strfmt_exp-format(num, exponent-sign: "e", base: 10, precision: none) = {
-  assert(_strfmt_is-numeric-type(num), message: "String formatter internal error: Cannot convert '" + repr(num) + "' to a number for exponent calculation.")
+  assert(_strfmt_is-numeric-type(num), message: "String formatter internal error: Cannot convert '" + repr(num) + "' to a number to obtain its scientific notation representation.")
   let f = float(num)
   let exponent = if f == 0 { 1 } else { calc.floor(calc.log(calc.abs(f), base: base)) }
   let mantissa = f / calc.pow(10, exponent)
@@ -406,20 +406,30 @@ parameter := argument '$'
       let (name, extras) = _strfmt_parse-fmt-name(f.name)
       if name == none {
         let fmt-index = unnamed-format-index
-        if num-replacements.len() <= fmt-index {
-          panic("String formatter error: Specified more {} formats than positional replacements.")
+        let amount-pos-replacements = num-replacements.len()
+        if amount-pos-replacements == 0 {
+          panic("String formatter error: Specified a {} (or similar) format to extract positional replacements, but none were given. Try specifying them sequentially after the format string, e.g. strfmt(\"{}, {}\", 5, 1+1) would become \"5, 2\".")
+        }
+        if amount-pos-replacements <= fmt-index {
+          let were-was = if amount-pos-replacements == 1 { "was" } else { "were" }
+          panic("String formatter error: Specified more {} (or similar) formats than positional replacements (only " + str(amount-pos-replacements) + " of them " + were-was + " given!). Please specify the missing positional arguments sequentially after the format string in the 'strfmt' call.")
         }
         replace-by = num-replacements.at(fmt-index)
         unnamed-format-index += 1
       } else if type(name) == "integer" {
         let fmt-index = name
-        if num-replacements.len() <= fmt-index {
-          panic("String formatter error: format key '" + name + "', from '{" + f.name + "}', does not match any given positional replacement.")
+        let amount-pos-replacements = num-replacements.len()
+        if amount-pos-replacements == 0 {
+          panic("String formatter error: format key '" + str(name) + "' would attempt to get a positional replacement, but none were given after the string. Try specifying positional replacements after the format string in the 'strfmt' call, e.g. strfmt(\"{1}, {0}\", 2, 3) would become \"3, 2\".")
+        }
+        if amount-pos-replacements <= fmt-index {
+          let were-was = if amount-pos-replacements == 1 { "was" } else { "were" }
+          panic("String formatter error: format key '" + str(name) + "', from '{" + f.name + "}', is not a valid positional replacement position (only " + str(amount-pos-replacements) + " of them " + were-was + " given). Note that the first position is 0. For example, strfmt(\"{1}, {0}\", 2, 3) would become \"3, 2\".")
         }
         replace-by = num-replacements.at(fmt-index)
       } else {  // named replacement
         if name not in named-replacements {
-          panic("String formatter error: format key '" + name + "', from '{" + f.name + "}', does not match any given named replacement.")
+          panic("String formatter error: format key '" + name + "', from '{" + f.name + "}', does not match any given named replacement. Try specifying it after the format string, e.g. like so: strfmt(\"Test: {" + name + "}\", " + name + ": 1 + 1) would become \"Test: 2\" (if that's a valid argument name in Typst's syntax).")
         }
         replace-by = named-replacements.at(name)
       }
@@ -430,7 +440,7 @@ parameter := argument '$'
     }
     // {...}ABCABCABC{...}  <--- push ABCABCABC to parts
     parts.push(format.slice(last-span-end, replace-span.at(0)))
-    // push the replacement string instead of {...}
+    // push the replacement string instead of the {...} at the end
     parts.push(replace-by)
     last-span-end = replace-span.at(1)
   }
@@ -438,5 +448,6 @@ parameter := argument '$'
     parts.push(format.slice(last-span-end, format.len()))
   }
 
+  // join all the string parts (constant parts + formatted parts + escaped parts)
   parts.join()
 }
