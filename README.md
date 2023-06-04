@@ -16,7 +16,7 @@ Download the `typst-strfmt.typ` file either from Releases or directly from the r
 
 That will give you access to the main function provided by this library (`strfmt`), which accepts a format string, followed by zero or more replacements to insert in that string (according to `{...}` formats inserted in that string), an optional `fmt-decimal-separator` parameter, and returns the formatted string, as described below.
 
-Its syntax is almost identical to Rust's `format!` (as specified here: https://doc.rust-lang.org/std/fmt/). You can escape formats by duplicating braces (`{{` and `}}` become `{` and `}`). Here are some examples (see more examples in the file `tests/strfmt-tests.typ`):
+Its syntax is almost identical to Rust's `format!` (as specified here: https://doc.rust-lang.org/std/fmt/). You can escape formats by duplicating braces (`{{` and `}}` become `{` and `}`). Here's an example (see more examples in the file `tests/strfmt-tests.typ`):
 
 ```js
 let s = strfmt("I'm {}. I have {num} cars. I'm {0}. {} is {{cool}}.", "John", "Carl", num: 10)
