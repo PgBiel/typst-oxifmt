@@ -222,7 +222,7 @@ parameter := argument '$'
 
   let is-numeric = _strfmt_is-numeric-type(replacement)
   if is-numeric {
-    if zero and type(replacement) == "integer" {
+    if zero {
       // disable fill, we will be prefixing with zeroes if necessary
       fill = none
     } else if fill == none {
