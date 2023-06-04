@@ -213,7 +213,7 @@ parameter := argument '$'
     }
     replacement = _strfmt_stringify(replacement)
     if fmt-decimal-separator not in (auto, none) {
-      replacement = replacement.replace(".", str(fmt-decimal-separator))
+      replacement = replacement.replace(".", _strfmt_stringify(fmt-decimal-separator))
     }
     return replacement
   }
@@ -351,7 +351,7 @@ parameter := argument '$'
       }
     }
     if fmt-decimal-separator not in (auto, none) {
-      replacement = replacement.replace(".", str(fmt-decimal-separator))
+      replacement = replacement.replace(".", _strfmt_stringify(fmt-decimal-separator))
     }
     if zero {
       let width-diff = width - (replacement.len() + sign.len() + hashtag-prefix.len())
