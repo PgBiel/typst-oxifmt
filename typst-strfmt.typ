@@ -206,9 +206,16 @@ type := '' | '?' | 'x?' | 'X?' | identifier
 count := parameter | integer
 parameter := argument '$'
 */
-#let _generate-replacement(fullname, extras, replacement, pos-replacements: (), named-replacements: (:)) = {
+#let _generate-replacement(fullname, extras, replacement, pos-replacements: (), named-replacements: (:), fmt-decimal-separator: auto) = {
   if extras == none {
-    return _strfmt_stringify(replacement)
+    if not _strfmt_is-numeric-type(replacement) {
+      fmt-decimal-separator = auto
+    }
+    replacement = _strfmt_stringify(replacement)
+    if fmt-decimal-separator not in (auto, none) {
+      replacement = replacement.replace(".", str(fmt-decimal-separator))
+    }
+    return replacement
   }
   let extras = _strfmt_stringify(extras)
   // note: usage of [\s\S] in regex to include all characters, incl. newline
@@ -343,6 +350,9 @@ parameter := argument '$'
         _strfmt_stringify(replacement)
       }
     }
+    if fmt-decimal-separator not in (auto, none) {
+      replacement = replacement.replace(".", str(fmt-decimal-separator))
+    }
     if zero {
       let width-diff = width - (replacement.len() + sign.len() + hashtag-prefix.len())
       if width-diff > 0 {  // prefix with the appropriate amount of zeroes
@@ -391,7 +401,7 @@ parameter := argument '$'
   replacement
 }
 
-#let strfmt(format, ..replacements) = {
+#let strfmt(format, ..replacements, fmt-decimal-separator: auto) = {
   if format == "" { return "" }
   let formats = _strfmt_formatparser(format)
   let num-replacements = replacements.pos()
@@ -438,7 +448,7 @@ parameter := argument '$'
         }
         replace-by = named-replacements.at(name)
       }
-      replace-by = _generate-replacement(f.name, extras, replace-by, pos-replacements: num-replacements, named-replacements: named-replacements)
+      replace-by = _generate-replacement(f.name, extras, replace-by, pos-replacements: num-replacements, named-replacements: named-replacements, fmt-decimal-separator: fmt-decimal-separator)
       replace-span = f.span
     } else {
       panic("String formatter error: Internal error (unexpected format received).")
