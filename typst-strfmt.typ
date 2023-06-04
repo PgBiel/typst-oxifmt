@@ -165,6 +165,34 @@
   sign + result
 }
 
+#let _strfmt_with-precision(num, precision) = {
+  if precision == none {
+    return _strfmt_stringify(num)
+  }
+  let result = _strfmt_stringify(calc.round(float(num), digits: calc.min(50, precision)))
+  let digits-match = result.match(regex("^\\d+\\.(\\d+)$"))
+  if digits-match != none and digits-match.captures.len() > 0 {
+    let digits = digits-match.captures.first()
+    let digits-len-diff = precision - digits.len()
+    // add missing zeroes for precision
+    if digits-len-diff > 0 {
+      result += "0" * digits-len-diff
+    }
+  }
+
+  result
+}
+
+#let _strfmt_exp-format(num, exponent-sign: "e", base: 10, precision: none) = {
+  assert(_strfmt_is-numeric-type(num), message: "String formatter internal error: Cannot convert '" + repr(num) + "' to a number for exponent calculation.")
+  let f = float(num)
+  let exponent = if f == 0 { 1 } else { calc.floor(calc.log(calc.abs(f), base: base)) }
+  let mantissa = f / calc.pow(10, exponent)
+  let mantissa = _strfmt_with-precision(mantissa, precision)
+
+  mantissa + exponent-sign + str(exponent)
+}
+
 // Parses {format:specslikethis}.
 // Rust's format spec grammar:
 /*
@@ -212,7 +240,7 @@ parameter := argument '$'
   let zero = zero == "0"
   let hashtag-prefix = ""
 
-  let valid-specs = ("", "?", "b", "x", "X", "o", "x?", "X?")
+  let valid-specs = ("", "?", "b", "x", "X", "o", "x?", "X?", "e", "E")
   let spec-error() = {
     panic("String formatter error: Unknown spec type '" + spectype + "', from '{" + fullname + "}'. Valid options include: '" + valid-specs.join("', '") + "'.")
   }
@@ -242,17 +270,12 @@ parameter := argument '$'
     } else {
       sign = ""
     }
-    if type(replacement) != "integer" and precision != none {
-      replacement = _strfmt_stringify(calc.round(replacement, digits: calc.min(50, precision)))
-      let digits-match = replacement.match(regex("^\\d+\\.(\\d+)$"))
-      if digits-match != none and digits-match.captures.len() > 0 {
-        let digits = digits-match.captures.first()
-        let digits-len-diff = precision - digits.len()
-        // add missing zeroes for precision
-        if digits-len-diff > 0 {
-          replacement += "0" * digits-len-diff
-        }
-      }
+
+    if spectype in ("e", "E") {
+      let exponent-sign = if spectype == "E" { "E" } else { "e" }
+      replacement = _strfmt_exp-format(calc.abs(replacement), exponent-sign: exponent-sign, precision: precision)
+    } else if type(replacement) != "integer" and precision != none {
+      replacement = _strfmt_with-precision(replacement, precision)
     } else if type(replacement) == "integer" and spectype in ("x", "X", "b", "o", "x?", "X?") {
       let radix-map = (x: 16, X: 16, "x?": 16, "X?": 16, b: 2, o: 8)
       let radix = radix-map.at(spectype)
