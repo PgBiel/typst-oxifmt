@@ -1,8 +1,8 @@
 # typst-strfmt
 
-A Typst library that brings string formatting through the `strfmt` function. Its syntax is taken directly from Rust's `format!` syntax, so read its page for more information (https://doc.rust-lang.org/std/fmt/). Only a few things aren't supported from the Rust syntax, such as the `p` (pointer) format type, or the `.*` precision specifier.
+A Typst library that brings convenient string formatting and interpolation through the `strfmt` function. Its syntax is taken directly from Rust's `format!` syntax, so read its page for more information (https://doc.rust-lang.org/std/fmt/). Only a few things aren't supported from the Rust syntax, such as the `p` (pointer) format type, or the `.*` precision specifier.
 
-I intend to add a few extras over time, though. The first "extra" I've added so far is the `fmt-decimal-separator: "string"` parameter, which lets you customize the decimal separator for decimal numbers. E.g. `strfmt("Result: {}", 5.8 fmt-decimal-separator: ",")` will return the string `"Result: 5,8"`. See more below.
+I intend to add a few extras over time, though. The first "extra" I've added so far is the `fmt-decimal-separator: "string"` parameter, which lets you customize the decimal separator for decimal numbers (floats) inserted into strings. E.g. `strfmt("Result: {}", 5.8, fmt-decimal-separator: ",")` will return the string `"Result: 5,8"` (comma instead of dot). See more below.
 
 ## Usage
 
@@ -12,7 +12,7 @@ Download the `typst-strfmt.typ` file either from Releases or directly from the r
 #import "typst-strfmt.typ": strfmt
 ```
 
-That will give you access to the main function provided by this library (`strfmt`), which accepts a format string, followed by zero or more replacements to insert in that string (according to `{...}` formats inserted in that string).
+That will give you access to the main function provided by this library (`strfmt`), which accepts a format string, followed by zero or more replacements to insert in that string (according to `{...}` formats inserted in that string), an optional `fmt-decimal-separator` parameter, and returns the formatted string, as described below.
 
 Its syntax is almost identical to Rust's `format!` (as specified here: https://doc.rust-lang.org/std/fmt/). You can escape formats by duplicating braces (`{{` and `}}` become `{` and `}`). Here are some examples (see more examples in the file `tests/strfmt-tests.typ`):
 
@@ -40,9 +40,9 @@ You can use `{:spec}` to customize your output. See the Rust docs linked above f
     - Add `e` or `E` at the end of the `spec` to ensure the number is represented in scientific notation (with `e` or `E` as the exponent separator, respectively).
     - For decimal numbers (floats), you can specify `fmt-decimal-separator: ","` to `strfmt` to have the decimal separator be a comma instead of a dot, for example.
         - To have this be the default, you can alias `strfmt`, such as using `#let strfmt = strfmt.with(fmt-decimal-separator: ",")`.
-    - Number arguments are ignored when the argument is not a number, but e.g. a string, even if it looks like a number.
+    - Number spec arguments (such as `.5`) are ignored when the argument is not a number, but e.g. a string, even if it looks like a number (such as `"5"`).
 - Note that all spec arguments above **have to be specified in order** - if you mix up the order, it won't work properly!
-        - Check the grammar below for the proper order (basically fill with align -> sign (+ or -) -> # -> 0 (for 0 left-padding) -> width (e.g. `8` from `08` or `9` from `-<9`) -> `.precision` -> spec type (`?`, `x`, `X`, `e`, ...)).
+    - Check the grammar below for the proper order, but, in summary: fill (character) with align (`<`, `>` or `^`) -> sign (`+` or `-`) -> `#` -> `0` (for 0 left-padding of numbers) -> width (e.g. `8` from `08` or `9` from `-<9`) -> `.precision` -> spec type (`?`, `x`, `X`, `b`, `o`, `e`, `E`)).
 
 Some examples:
 
@@ -52,6 +52,9 @@ Some examples:
 
 #let s2 = strfmt("{:_>+11.5}", 59.4)
 #assert.eq(s2, "__+59.40000")
+
+#let s3 = strfmt("Dict: {:!<10?}", (a: 5))
+#assert.eq(s3, "Dict: (a: 5)!!!!")
 ```
 
 ## Grammar
