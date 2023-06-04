@@ -42,11 +42,18 @@
       if last-was-lbracket {
         last-was-lbracket = false  // escape {{
         last-was-rbracket = false
-        current-fmt-name += character
         if current-fmt-span.at(0) == i - 1 {
           current-fmt-span = none  // cancel this span
+          current-fmt-name = none
         }
-        result.push((escape: (escaped: "{", span: (i - 1, i + 1))))
+        if current-fmt-name != none {
+          // if in the middle of a larger span ({ ... {{ <-):
+          // add the escaped character to the format name
+          current-fmt-name += character
+        } else {
+          // outside a span ({...} {{ <-) => emit an 'escaped' token
+          result.push((escape: (escaped: "{", span: (i - 1, i + 1))))
+        }
         continue
       }
       if last-was-rbracket {
@@ -54,20 +61,21 @@
         (result, current-fmt-span, current-fmt-name) = write-format-span(i, result, current-fmt-span, current-fmt-name)
         last-was-rbracket = false
       }
-      // already had a { before this, but not immediately before
-      if current-fmt-span != none {
-        excessive-lbracket()
+      if current-fmt-span == none {
+        // begin span
+        current-fmt-span = (i, none)
+        current-fmt-name = ""
       }
-      // begin span
-      current-fmt-span = (i, none)
-      current-fmt-name = ""
       last-was-lbracket = true
     } else if character == "}" {
       last-was-lbracket = false
       if last-was-rbracket {
         last-was-rbracket = false  // escape }}
-        current-fmt-name += character
-        result.push((escape: (escaped: "}", span: (i - 1, i + 1))))
+        if current-fmt-name != none {
+          current-fmt-name += character
+        } else {
+          result.push((escape: (escaped: "}", span: (i - 1, i + 1))))
+        }
         continue
       }
       // delay closing the span to the next iteration

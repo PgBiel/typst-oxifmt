@@ -10,6 +10,9 @@
     // test escaping {{ }}, plus repr() on bools and dicts (and anything that can't be str()'ed)
     assert.eq(strfmt("a{{}}b ={}{}= c{0}d", false, (a: "55", b: 20.3)), "a{}b =false(a: \"55\", b: 20.3)= cfalsed")
 
+    // test escaping {{ }} from inside { } formats
+    assert.eq(strfmt("a{b{{b}}b}", ..("b{b}b": 5)), "a5")
+
     // test 0 prefix with numbers, but also using 0 as a non-numeric affix
     assert.eq(strfmt("{:08}|{0:0<8}|{0:0>8}|{0:0^8}", 120), "00000120|12000000|00000120|000120000")
 
