@@ -233,7 +233,7 @@ parameter := argument '$'
     regex("^(?:([\\s\\S])?([<^>]))?([+-])?(#)?(0)?(?:(?:(\\d+)|([^.$]+))\$|(\\d+))?(?:\\.(?:(?:(\\d+)|([^$]+))\$|(\\d+|\*)))?([^\\s]*)\\s*$")
   )
   if extra-parts == none {
-    panic("String formatter error: Invalid format spec '" + extras + "', from '{" + fullname + "}'. Try escaping the braces { } with {{ }} if you wanted to insert literal braces.")
+    panic("String formatter error: Invalid format spec '" + extras + "', from '{" + fullname.replace("{", "{{").replace("}", "}}") + "}'. Try escaping the braces { } with {{ }} if you wanted to insert literal braces.")
   }
 
   let (fill, align, sign, hashtag, zero, width-posarg, width-namedarg, width-lit, precision-posarg, precision-namedarg, precision-lit, spectype) = extra-parts.captures
@@ -248,32 +248,32 @@ parameter := argument '$'
       let i = int(pos)
       assert(
         pos-replacements.len() > 0,
-        message: "String formatter error: Attempted to use positional argument " + str(i) + " for " + spec-part-name + ", but no positional arguments were given (from '{" + fullname + "}')."
+        message: "String formatter error: Attempted to use positional argument " + str(i) + " for " + spec-part-name + ", but no positional arguments were given (from '{" + fullname.replace("{", "{{").replace("}", "}}") + "}')."
       )
       assert(
         i >= 0 and i < pos-replacements.len(),
-        message: "String formatter error: Attempted to use positional argument " + str(i) + " for " + spec-part-name + ", but there is no argument at that position (from '{" + fullname + "}'). Please note that positional arguments start at position 0, and are specified in order after the format string in the 'strfmt' call."
+        message: "String formatter error: Attempted to use positional argument " + str(i) + " for " + spec-part-name + ", but there is no argument at that position (from '{" + fullname.replace("{", "{{").replace("}", "}}") + "}'). Please note that positional arguments start at position 0, and are specified in order after the format string in the 'strfmt' call."
       )
       let arg = pos-replacements.at(i)
       assert(
         type(arg) == "integer",
-        message: "String formatter error: Attempted to use positional argument " + str(i) + " for " + spec-part-name + ", but it was a(n) '" + type(arg) + "', not an integer (from '{" + fullname + "}')."
+        message: "String formatter error: Attempted to use positional argument " + str(i) + " for " + spec-part-name + ", but it was a(n) '" + type(arg) + "', not an integer (from '{" + fullname.replace("{", "{{").replace("}", "}}") + "}')."
       )
 
       int(arg)
     } else if named != none {
       assert(
         named-replacements.len() > 0,
-        message: "String formatter error: Attempted to use named argument '" + named + "' for " + spec-part-name + ", but no named arguments were given (from '{" + fullname + "}')."
+        message: "String formatter error: Attempted to use named argument '" + named + "' for " + spec-part-name + ", but no named arguments were given (from '{" + fullname.replace("{", "{{").replace("}", "}}") + "}')."
       )
       assert(
         named in named-replacements,
-        message: "String formatter error: Attempted to use named argument '" + named + "' for " + spec-part-name + ", but there is no argument associated to that name (from '{" + fullname + "}'). Ensure you pass that argument in the 'strfmt' call, e.g. strfmt(\"format...\", " + named + ": 20)."
+        message: "String formatter error: Attempted to use named argument '" + named + "' for " + spec-part-name + ", but there is no argument associated to that name (from '{" + fullname.replace("{", "{{").replace("}", "}}") + "}'). Ensure you pass that argument in the 'strfmt' call, e.g. strfmt(\"string {:.myarg$}\", 5.823, myarg: 10)."
       )
       let arg = named-replacements.at(named)
       assert(
         type(arg) == "integer",
-        message: "String formatter error: Attempted to use named argument '" + named + "' for " + spec-part-name + ", but it was a(n) '" + type(arg) + "', not an integer (from '{" + fullname + "}')."
+        message: "String formatter error: Attempted to use named argument '" + named + "' for " + spec-part-name + ", but it was a(n) '" + type(arg) + "', not an integer (from '{" + fullname.replace("{", "{{").replace("}", "}}") + "}')."
       )
 
       int(arg)
@@ -283,7 +283,7 @@ parameter := argument '$'
   }
 
   if precision-lit == "*" {
-    panic("String formater error: Precision specification of type `.*` is not supported yet (from '{" + fullname + "}'). Try specifying your desired precision directly on the format spec, e.g. `.5`, or through some argument, e.g. `.name$` to take it from the 'name' named argument.")
+    panic("String formater error: Precision specification of type `.*` is not supported yet (from '{" + fullname.replace("{", "{{").replace("}", "}}") + "}'). Try specifying your desired precision directly on the format spec, e.g. `.5`, or through some argument, e.g. `.name$` to take it from the 'name' named argument.")
   }
 
   let align = if align == "" {
@@ -307,7 +307,7 @@ parameter := argument '$'
   let valid-specs = ("", "?", "b", "x", "X", "o", "x?", "X?", "e", "E")
   let spec-error() = {
     panic(
-      "String formatter error: Unknown spec type '" + spectype + "', from '{" + fullname + "}'. Valid options include: '" + valid-specs.join("', '") + "'. Maybe you specified some invalid formatting spec syntax (after the ':'), which can also prompt this error. Check the typst-strfmt docs for more information.")
+      "String formatter error: Unknown spec type '" + spectype + "', from '{" + fullname.replace("{", "{{").replace("}", "}}") + "}'. Valid options include: '" + valid-specs.join("', '") + "'. Maybe you specified some invalid formatting spec syntax (after the ':'), which can also prompt this error. Check the typst-strfmt docs for more information.")
   }
   if spectype not in valid-specs {
     spec-error()
@@ -448,12 +448,12 @@ parameter := argument '$'
         }
         if amount-pos-replacements <= fmt-index {
           let were-was = if amount-pos-replacements == 1 { "was" } else { "were" }
-          panic("String formatter error: format key '" + str(name) + "', from '{" + f.name + "}', is not a valid positional replacement position (only " + str(amount-pos-replacements) + " of them " + were-was + " given). Note that the first position is 0. For example, strfmt(\"{1}, {0}\", 2, 3) would become \"3, 2\".")
+          panic("String formatter error: format key '" + str(name) + "', from '{" + f.name.replace("{", "{{").replace("}", "}}") + "}', is not a valid positional replacement position (only " + str(amount-pos-replacements) + " of them " + were-was + " given). Note that the first position is 0. For example, strfmt(\"{1}, {0}\", 2, 3) would become \"3, 2\".")
         }
         replace-by = num-replacements.at(fmt-index)
       } else {  // named replacement
         if name not in named-replacements {
-          panic("String formatter error: format key '" + name + "', from '{" + f.name + "}', does not match any given named replacement. Try specifying it after the format string, e.g. like so: strfmt(\"Test: {" + name + "}\", " + name + ": 1 + 1) would become \"Test: 2\" (if that's a valid argument name in Typst's syntax).")
+          panic("String formatter error: format key '" + name + "', from '{" + f.name.replace("{", "{{").replace("}", "}}") + "}', does not match any given named replacement. Try specifying it after the format string, e.g. like so: strfmt(\"Test: {myarg}\", myarg: 1 + 1) would become \"Test: 2\".")
         }
         replace-by = named-replacements.at(name)
       }
