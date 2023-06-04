@@ -19,8 +19,8 @@ That will give you access to the main function provided by this library (`strfmt
 Its syntax is almost identical to Rust's `format!` (as specified here: https://doc.rust-lang.org/std/fmt/). You can escape formats by duplicating braces (`{{` and `}}` become `{` and `}`). Here are some examples (see more examples in the file `tests/strfmt-tests.typ`):
 
 ```js
-let s = strfmt("Hi, my name is {}. I have {bananas} bananas. Remember: I am {0}, friend of {}. Braces: {{}}", "John", "Carl", bananas: 10)
-assert.eq(s, "Hi, my name is John. I have 10 bananas. Remember: I am John, friend of Carl. Braces: {}")
+let s = strfmt("I'm {}. I have {num} cars. I'm {0}. {} is {{cool}}.", "John", "Carl", num: 10)
+assert.eq(s, "I'm John. I have 10 cars. I'm John. Carl is {cool}.")
 ```
 
 Note that `{}` extracts positional arguments after the string sequentially (the first `{}` extracts the first one, the second `{}` extracts the second one, and so on), while `{0}`, `{1}`, etc. will always extract the first, the second etc. positional arguments after the string. Additionally, `{bananas}` will extract the named argument "bananas".
