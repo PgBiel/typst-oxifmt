@@ -4,7 +4,7 @@ A Typst library that brings convenient string formatting and interpolation throu
 
 I intend to add a few extras over time, though. The first "extra" I've added so far is the `fmt-decimal-separator: "string"` parameter, which lets you customize the decimal separator for decimal numbers (floats) inserted into strings. E.g. `strfmt("Result: {}", 5.8, fmt-decimal-separator: ",")` will return the string `"Result: 5,8"` (comma instead of dot). See more below.
 
-**Compatible with:** [Typst](https://github.com/typst/typst) v0.4.0
+**Compatible with:** [Typst](https://github.com/typst/typst) v0.4.0, v0.5.0, v0.6.0
 
 ## Table of Contents
 
@@ -84,6 +84,14 @@ parameter := argument '$'
 ```
 
 Note, however, that precision of type `.*` is not supported yet and will raise an error.
+
+## Testing
+
+Test with the following command (from the project root folder):
+
+```sh
+cd tests && typst c strfmt-tests.typ
+```
 
 ## Changelog
 
