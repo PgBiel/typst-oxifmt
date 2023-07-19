@@ -6,6 +6,13 @@ I intend to add a few extras over time, though. The first "extra" I've added so 
 
 **Compatible with:** [Typst](https://github.com/typst/typst) v0.4.0
 
+## Table of Contents
+
+- [Usage](#usage)
+- [Grammar](#grammar)
+- [Changelog](#changelog)
+- [License](#license)
+
 ## Usage
 
 Download the `typst-strfmt.typ` file either from Releases or directly from the repository. Then, move it to your project's folder, and write at the top of your typst file(s):
@@ -14,7 +21,7 @@ Download the `typst-strfmt.typ` file either from Releases or directly from the r
 #import "typst-strfmt.typ": strfmt
 ```
 
-That will give you access to the main function provided by this library (`strfmt`), which accepts a format string, followed by zero or more replacements to insert in that string (according to `{...}` formats inserted in that string), an optional `fmt-decimal-separator` parameter, and returns the formatted string, as described below.
+Doing the above will give you access to the main function provided by this library (`strfmt`), which accepts a format string, followed by zero or more replacements to insert in that string (according to `{...}` formats inserted in that string), an optional `fmt-decimal-separator` parameter, and returns the formatted string, as described below.
 
 Its syntax is almost identical to Rust's `format!` (as specified here: https://doc.rust-lang.org/std/fmt/). You can escape formats by duplicating braces (`{{` and `}}` become `{` and `}`). Here's an example (see more examples in the file `tests/strfmt-tests.typ`):
 
@@ -83,3 +90,7 @@ Note, however, that precision of type `.*` is not supported yet and will raise a
 ### v0.1.0
 
 - Initial release, added `strfmt`.
+
+## License
+
+MIT license (see the `LICENSE` file).
