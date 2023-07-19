@@ -90,7 +90,7 @@ Note, however, that precision of type `.*` is not supported yet and will raise a
 Test with the following command (from the project root folder):
 
 ```sh
-cd tests && typst c strfmt-tests.typ
+cd tests && typst c strfmt-tests.typ --root ..
 ```
 
 ## Changelog
