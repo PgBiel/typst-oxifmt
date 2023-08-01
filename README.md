@@ -101,4 +101,4 @@ cd tests && typst c strfmt-tests.typ --root ..
 
 ## License
 
-MIT license (see the `LICENSE` file).
+MIT-0 license (see the `LICENSE` file).
