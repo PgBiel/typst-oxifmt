@@ -1,8 +1,8 @@
 [package]
-name = "strfmt"
+name = "oxifmt"
 version = "0.1.0"
 authors = ["PgBiel <https://github.com/PgBiel>"]
 license = "MIT"
 description = "Convenient Rust-like string formatting in Typst"
-entrypoint = "typst-strfmt.typ"
-repository = "https://github.com/PgBiel/typst-strfmt"
+entrypoint = "typst-oxifmt.typ"
+repository = "https://github.com/PgBiel/typst-oxifmt"

@@ -1,4 +1,4 @@
-#import "../typst-strfmt.typ": strfmt
+#import "../typst-oxifmt.typ": strfmt
 
 #{
     // test basics (sequential args, named args, pos args)

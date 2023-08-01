@@ -1,4 +1,4 @@
-# typst-strfmt (v0.1.0)
+# typst-oxifmt (v0.1.0)
 
 A Typst library that brings convenient string formatting and interpolation through the `strfmt` function. Its syntax is taken directly from Rust's `format!` syntax, so read its page for more information (https://doc.rust-lang.org/std/fmt/). Only a few things aren't supported from the Rust syntax, such as the `p` (pointer) format type, or the `.*` precision specifier.
 
@@ -15,10 +15,10 @@ I intend to add a few extras over time, though. The first "extra" I've added so 
 
 ## Usage
 
-Download the `typst-strfmt.typ` file either from Releases or directly from the repository. Then, move it to your project's folder, and write at the top of your typst file(s):
+Download the `typst-oxifmt.typ` file either from Releases or directly from the repository. Then, move it to your project's folder, and write at the top of your typst file(s):
 
 ```js
-#import "typst-strfmt.typ": strfmt
+#import "typst-oxifmt.typ": strfmt
 ```
 
 Doing the above will give you access to the main function provided by this library (`strfmt`), which accepts a format string, followed by zero or more replacements to insert in that string (according to `{...}` formats inserted in that string), an optional `fmt-decimal-separator` parameter, and returns the formatted string, as described below.
