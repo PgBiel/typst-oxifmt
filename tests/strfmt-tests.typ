@@ -46,3 +46,63 @@
     // test custom decimal separators (III) - ensure we can fetch it from inside
     assert.eq(strfmt("5{fmt-decimal-separator}6", fmt-decimal-separator: "|"), "5|6")
 }
+// DOC TESTS
+#{
+    // --- Usage ---
+    {
+        let s = strfmt("I'm {}. I have {num} cars. I'm {0}. {} is {{cool}}.", "John", "Carl", num: 10)
+        assert.eq(s, "I'm John. I have 10 cars. I'm John. Carl is {cool}.")
+    }
+    // --- Formatting options ---
+    {
+        let s1 = strfmt("{0:?}, {test:+012e}, {1:-<#8x}", "hi", -74, test: 569.4)
+        assert.eq(s1, "\"hi\", +00005.694e2, -0x4a---")
+
+        let s2 = strfmt("{:_>+11.5}", 59.4)
+        assert.eq(s2, "__+59.40000")
+
+        let s3 = strfmt("Dict: {:!<10?}", (a: 5))
+        assert.eq(s3, "Dict: (a: 5)!!!!")
+    }
+    // --- Examples ---
+    {
+        let s = strfmt("First: {}, Second: {}, Fourth: {3}, Banana: {banana} (brackets: {{escaped}})", 1, 2.1, 3, label("four"), banana: "Banana!!")
+        assert.eq(s, "First: 1, Second: 2.1, Fourth: four, Banana: Banana!! (brackets: {escaped})")
+    }
+    {
+        let s = strfmt("The value is: {:?} | Also the label is {:?}", "something", label("label"))
+        assert.eq(s, "The value is: \"something\" | Also the label is <label>")
+    }
+    {
+        let s = strfmt("Values: {:?}, {1:?}, {stuff:?}", (test: 500), ("a", 5.1), stuff: [a])
+        assert.eq(s, "Values: (test: 500), (\"a\", 5.1), [a]")
+    }
+    {
+        let s = strfmt("Left5 {:_<5}, Right6 {:*>6}, Center10 {centered: ^10?}, Left3 {tleft:_<3}", "xx", 539, tleft: "okay", centered: [a])
+        assert.eq(s, "Left5 xx___, Right6 ***539, Center10     [a]    , Left3 okay")
+    }
+    {
+        let s = strfmt("Left-padded7 numbers: {:07} {:07} {:07} {3:07}", 123, -344, 44224059, 45.32)
+        assert.eq(s, "Left-padded7 numbers: 0000123 -000344 44224059 0045.32")
+    }
+    {
+        let s = strfmt("Some numbers: {:+} {:+08}; With fill and align: {:_<+8}; Negative (no-op): {neg:+}", 123, 456, 4444, neg: -435)
+        assert.eq(s, "Some numbers: +123 +0000456; With fill and align: +4444___; Negative (no-op): -435")
+    }
+    {
+        let s = strfmt("Bases (10, 2, 8, 16(l), 16(U):) {0} {0:b} {0:o} {0:x} {0:X} | W/ prefixes and modifiers: {0:#b} {0:+#09o} {0:_>+#9X}", 124)
+        assert.eq(s, "Bases (10, 2, 8, 16(l), 16(U):) 124 1111100 174 7c 7C | W/ prefixes and modifiers: 0b1111100 +0o000174 ____+0x7C")
+    }
+    {
+        let s = strfmt("{0:.8} {0:.2$} {0:.potato$}", 1.234, 0, 2, potato: 5)
+        assert.eq(s, "1.23400000 1.23 1.23400")
+    }
+    {
+        let s = strfmt("{0:e} {0:E} {0:+.9e} | {1:e} | {2:E}", 124.2312, 50, -0.02)
+        assert.eq(s, "1.242312e2 1.242312E2 +1.242312000e2 | 5e1 | -2E-2")
+    }
+    {
+        let s = strfmt("{0} {0:.6} {0:.5e}", 1.432, fmt-decimal-separator: ",")
+        assert.eq(s, "1,432 1,432000 1,43200e0")
+    }
+}
