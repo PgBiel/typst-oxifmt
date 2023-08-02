@@ -1,3 +1,4 @@
+// typst-strfmt v0.1.1 (WIP)
 #let _strfmt_formatparser(s) = {
   if type(s) != "string" {
     panic("String format parsing internal error: String format parser given non-string.")
@@ -335,6 +336,9 @@ parameter := argument '$'
     } else {
       sign = ""
     }
+
+    // we'll add the sign back later!
+    replacement = calc.abs(replacement)
 
     if spectype in ("e", "E") {
       let exponent-sign = if spectype == "E" { "E" } else { "e" }
