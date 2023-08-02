@@ -1,4 +1,4 @@
-// typst-oxifmt v0.1.1 (WIP)
+// typst-oxifmt v0.2.0
 #let _strfmt_formatparser(s) = {
   if type(s) != "string" {
     panic("String format parsing internal error: String format parser given non-string.")
