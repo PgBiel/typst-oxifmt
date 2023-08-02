@@ -217,8 +217,8 @@ The tests succeeded if you received no error messages from the last command (ple
 ### v0.2.0
 
 - `oxifmt:0.2.0` is now available through Typst's Package Manager! You can now write `#import "@preview/oxifmt:0.2.0": strfmt` to use the library.
-- Fixed negative numbers being formatted with two minus signs
-- Fixed custom precision of floats not working when they are exact integers
+- Fixed negative numbers being formatted with two minus signs.
+- Fixed custom precision of floats not working when they are exact integers.
 
 ### v0.1.0
 
