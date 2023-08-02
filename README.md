@@ -9,7 +9,9 @@ A few extras (beyond the Rust-like syntax) will be added over time, though (feel
 ## Table of Contents
 
 - [Usage](#usage)
-- [Grammar](#grammar)
+    - [Formatting options](#formatting-options)
+    - [Examples](#examples)
+    - [Grammar](#grammar)
 - [Issues and Contributing](#issues-and-contributing)
 - [Testing](#testing)
 - [Changelog](#changelog)
@@ -28,13 +30,19 @@ Doing the above will give you access to the main function provided by this libra
 Its syntax is almost identical to Rust's `format!` (as specified here: https://doc.rust-lang.org/std/fmt/). You can escape formats by duplicating braces (`{{` and `}}` become `{` and `}`). Here's an example (see more examples in the file `tests/strfmt-tests.typ`):
 
 ```js
+#import "typst-oxifmt.typ": strfmt
+
 let s = strfmt("I'm {}. I have {num} cars. I'm {0}. {} is {{cool}}.", "John", "Carl", num: 10)
 assert.eq(s, "I'm John. I have 10 cars. I'm John. Carl is {cool}.")
 ```
 
 Note that `{}` extracts positional arguments after the string sequentially (the first `{}` extracts the first one, the second `{}` extracts the second one, and so on), while `{0}`, `{1}`, etc. will always extract the first, the second etc. positional arguments after the string. Additionally, `{bananas}` will extract the named argument "bananas".
 
-You can use `{:spec}` to customize your output. See the Rust docs linked above for more info, but here's a summary:
+### Formatting options
+
+You can use `{:spec}` to customize your output. See the Rust docs linked above for more info, but a summary is below.
+
+(You may also want to check out the examples at [Examples](#examples).)
 
 - Adding a `?` at the end of `spec` (that is, writing e.g. `{0:?}`) will call `repr()` to stringify your argument, instead of `str()`. Note that this only has an effect if your argument is a string, an integer, a float or a `label()` / `<label>` - for all other types (such as booleans or elements), `repr()` is always called (as `str()` is unsupported for those).
     - For strings, `?` (and thus `repr()`) has the effect of printing them with double quotes. For floats, this ensures a `.0` appears after it, even if it doesn't have decimal digits. For integers, this doesn't change anything. Finally, for labels, the `<label>` (with `?`) is printed as `<label>` instead of `label`.
@@ -59,6 +67,8 @@ You can use `{:spec}` to customize your output. See the Rust docs linked above f
 Some examples:
 
 ```js
+#import "typst-oxifmt.typ": strfmt
+
 #let s1 = strfmt("{0:?}, {test:+012e}, {1:-<#8x}", "hi", -74, test: 569.4)
 #assert.eq(s1, "\"hi\", +00005.694e2, -0x4a---")
 
@@ -69,7 +79,99 @@ Some examples:
 #assert.eq(s3, "Dict: (a: 5)!!!!")
 ```
 
-## Grammar
+### Examples
+
+- **Inserting labels, text and numbers into strings:**
+```js
+#import "typst-oxifmt.typ": strfmt
+
+#let s = strfmt("First: {}, Second: {}, Fourth: {3}, Banana: {banana} (brackets: {{escaped}})", 1, 2.1, 3, label("four"), banana: "Banana!!")
+#assert.eq(s, "First: 1, Second: 2.1, Fourth: four, Banana: Banana!! (brackets: {escaped})")
+```
+
+- **Forcing `repr()` with `{:?}`** (which adds quotes around strings, and other things - basically represents a Typst value):
+```js
+#import "typst-oxifmt.typ": strfmt
+
+#let s = strfmt("The value is: {:?} | Also the label is {:?}", "something", label("label"))
+#assert.eq(s, "The value is: \"something\" | Also the label is <label>")
+```
+
+- **Inserting other types than numbers and strings** (for now, they will always use `repr()`, even without `{...:?}`, although that is more explicit):
+```js
+#import "typst-oxifmt.typ": strfmt
+
+#let s = strfmt("Values: {:?}, {1:?}, {stuff:?}", (test: 500), ("a", 5.1), stuff: [a])
+#assert.eq(s, "Values: (test: 500), (\"a\", 5.1), [a]")
+```
+
+- **Padding to a certain width with characters:** Use `{:x<8}`, where `x` is the character to pad with (e.g. space or `_`, but can be anything), `<` is the alignment of the original text (can be `<` for left aligned (padding goes to the right), `>` for right aligned (padded to its left) and `^` for center aligned (padded both left and right)):
+```js
+#import "typst-oxifmt.typ": strfmt
+
+#let s = strfmt("Left5 {:_<5}, Right6 {:*>6}, Center10 {centered: ^10?}, Left3 {tleft:_<3}", "xx", 539, tleft: "okay", centered: [a])
+#assert.eq(s, "Left5 xx___, Right6 ***539, Center10     [a]    , Left3 okay")
+// note how 'okay' didn't suffer any padding at all (it already had at least the desired total width).
+```
+
+- **Padding numbers with zeroes to the left:** It's a similar functionality to the above, however you just write `{:08}` for 8 characters (for instance) - note that any characters in the number's representation matter for width (including sign, dot and decimal part):
+```js
+#import "typst-oxifmt.typ": strfmt
+
+#let s = strfmt("Left-padded7 numbers: {:07} {:07} {:07} {3:07}", 123, -344, 44224059, 45.32)
+#assert.eq(s, "Left-padded7 numbers: 0000123 -000344 44224059 0045.32")
+```
+
+- **Defining padding-to width using parameters, not literals:** If you want the desired replacement width (the `8` in `{:08}` or `{: ^8}`) to be passed via parameter (instead of being hardcoded into the format string), you can specify `parameter$` in place of the width, e.g. `{:02$}` to take it from the third positional parameter, or `{:a>banana$}` to take it from the parameter named `banana` - note that the chosen parameter **must be an integer** (desired total width):
+```js
+#import "typst-oxifmt.typ": strfmt
+
+#let s = strfmt("Padding depending on parameter: {0:02$} and {0:a>banana$}", 432, 0, 5, banana: 9)
+#assert.eq(s, "Padding depending on parameter: 00432 aaaaaa432")  // widths 5 and 9
+```
+
+- **Displaying `+` on positive numbers:** Just add a `+` at the "beginning", i.e., before the `#0` (if either is there), or after the custom fill and align (if it's there and not `0` - see [Grammar](#grammar) for the exact positioning), like so:
+```js
+#import "typst-oxifmt.typ": strfmt
+
+#let s = strfmt("Some numbers: {:+} {:+08}; With fill and align: {:_<+8}; Negative (no-op): {neg:+}", 123, 456, 4444, neg: -435)
+#assert.eq(s, "Some numbers: +123 +0000456; With fill and align: +4444___; Negative (no-op): -435")
+
+```
+
+- **Converting numbers to bases 2, 8 and 16:** Use one of the following specifier types (i.e., characters which always go at the very end of the format): `b` (base 2), `o` (octal), `x` (lowercase hexadecimal) or `X` (uppercase hexadecimal). You can also add a `#` between `+` and `0` (see the exact position at the [Grammar](#grammar)) to display a **base prefix** before the number (i.e. `0b` for binary, `0o` for octal and `0x` for hexadecimal):
+```js
+#import "typst-oxifmt.typ": strfmt
+
+#let s = strfmt("Bases (10, 2, 8, 16(l), 16(U):) {0} {0:b} {0:o} {0:x} {0:X} | W/ prefixes and modifiers: {0:#b} {0:+#09o} {0:_>+#9X}", 124)
+#assert.eq(s, "Bases (10, 2, 8, 16(l), 16(U):) 124 1111100 174 7c 7C | W/ prefixes and modifiers: 0b1111100 +0o000174 ____+0x7C")
+```
+
+- **Picking float precision (right-extending with zeroes):** Add, at the end of the format (just before the spec type (such as `?`), if there's any), either `.precision` (hardcoded, e.g. `.8` for 8 decimal digits) or `.parameter$` (taking the precision value from the specified parameter, like with `width`):
+```js
+#import "typst-oxifmt.typ": strfmt
+
+#let s = strfmt("{0:.8} {0:.2$} {0:.potato$}", 1.234, 0, 2, potato: 5)
+#assert.eq(s, "1.23400000 1.23 1.23400")
+```
+
+- **Scientific notation:** Use `e` (lowercase) or `E` (uppercase) as specifier types (can be combined with precision):
+```js
+#import "typst-oxifmt.typ": strfmt
+
+#let s = strfmt("{0:e} {0:E} {0:+.9e} | {1:e} | {2:E}", 124.2312, 50, -0.02)
+#assert.eq(s, "1.242312e2 1.242312E2 +1.242312000e2 | 5e1 | -2E-2")
+```
+
+- **Customizing the decimal separator on floats:** Just specify `fmt-decimal-separator: ","` (comma as an example):
+```js
+#import "typst-oxifmt.typ": strfmt
+
+#let s = strfmt("{0} {0:.6} {0:.5e}", 1.432, fmt-decimal-separator: ",")
+#assert.eq(s, "1,432 1,432000 1,43200e0")
+```
+
+### Grammar
 
 Here's the grammar specification for valid format `spec`s (in `{name:spec}`), which is basically Rust's format:
 
