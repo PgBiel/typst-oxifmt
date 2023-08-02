@@ -25,10 +25,10 @@ You can use this library through Typst's package manager (for Typst v0.6.0+):
 #import "@preview/oxifmt:0.2.0": strfmt
 ```
 
-For older Typst versions, download the `typst-oxifmt.typ` file either from Releases or directly from the repository. Then, move it to your project's folder, and write at the top of your Typst file(s):
+For older Typst versions, download the `oxifmt.typ` file either from Releases or directly from the repository. Then, move it to your project's folder, and write at the top of your Typst file(s):
 
 ```js
-#import "typst-oxifmt.typ": strfmt
+#import "oxifmt.typ": strfmt
 ```
 
 Doing the above will give you access to the main function provided by this library (`strfmt`), which accepts a format string, followed by zero or more replacements to insert in that string (according to `{...}` formats inserted in that string), an optional `fmt-decimal-separator` parameter, and returns the formatted string, as described below.
