@@ -105,7 +105,7 @@ Some examples:
 #assert.eq(s, "Values: (test: 500), (\"a\", 5.1), [a]")
 ```
 
-- **Padding to a certain width with characters:** Use `{:x<8}`, where `x` is the character to pad with (e.g. space or `_`, but can be anything), `<` is the alignment of the original text (can be `<` for left aligned (padding goes to the right), `>` for right aligned (padded to its left) and `^` for center aligned (padded both left and right)):
+- **Padding to a certain width with characters:** Use `{:x<8}`, where `x` is the **character to pad with** (e.g. space or `_`, but can be anything), `<` is the **alignment of the original text** relative to the padding (can be `<` for left aligned (padding goes to the right), `>` for right aligned (padded to its left) and `^` for center aligned (padded at both left and right)), and `8` is the **desired total width** (padding will add enough characters to reach this width; if the replacement string already has this width, no padding will be added):
 ```js
 #import "typst-oxifmt.typ": strfmt
 
@@ -114,7 +114,7 @@ Some examples:
 // note how 'okay' didn't suffer any padding at all (it already had at least the desired total width).
 ```
 
-- **Padding numbers with zeroes to the left:** It's a similar functionality to the above, however you just write `{:08}` for 8 characters (for instance) - note that any characters in the number's representation matter for width (including sign, dot and decimal part):
+- **Padding numbers with zeroes to the left:** It's a similar functionality to the above, however you write `{:08}` for 8 characters (for instance) - note that any characters in the number's representation matter for width (including sign, dot and decimal part):
 ```js
 #import "typst-oxifmt.typ": strfmt
 
@@ -139,7 +139,7 @@ Some examples:
 
 ```
 
-- **Converting numbers to bases 2, 8 and 16:** Use one of the following specifier types (i.e., characters which always go at the very end of the format): `b` (base 2), `o` (octal), `x` (lowercase hexadecimal) or `X` (uppercase hexadecimal). You can also add a `#` between `+` and `0` (see the exact position at the [Grammar](#grammar)) to display a **base prefix** before the number (i.e. `0b` for binary, `0o` for octal and `0x` for hexadecimal):
+- **Converting numbers to bases 2, 8 and 16:** Use one of the following specifier types (i.e., characters which always go at the very end of the format): `b` (binary), `o` (octal), `x` (lowercase hexadecimal) or `X` (uppercase hexadecimal). You can also add a `#` between `+` and `0` (see the exact position at the [Grammar](#grammar)) to display a **base prefix** before the number (i.e. `0b` for binary, `0o` for octal and `0x` for hexadecimal):
 ```js
 #import "typst-oxifmt.typ": strfmt
 
@@ -159,8 +159,8 @@ Some examples:
 ```js
 #import "typst-oxifmt.typ": strfmt
 
-#let s = strfmt("{0:e} {0:E} {0:+.9e} | {1:e} | {2:E}", 124.2312, 50, -0.02)
-#assert.eq(s, "1.242312e2 1.242312E2 +1.242312000e2 | 5e1 | -2E-2")
+#let s = strfmt("{0:e} {0:E} {0:+.9e} | {1:e} | {2:.4E}", 124.2312, 50, -0.02)
+#assert.eq(s, "1.242312e2 1.242312E2 +1.242312000e2 | 5e1 | -2.0000E-2")
 ```
 
 - **Customizing the decimal separator on floats:** Just specify `fmt-decimal-separator: ","` (comma as an example):
