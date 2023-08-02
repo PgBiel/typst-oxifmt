@@ -196,11 +196,15 @@ Please report any issues or send any contributions (through pull requests) to th
 
 ## Testing
 
-If you wish to contribute, you may test this package with the following command (from the project root folder):
+If you wish to contribute, you may clone the repository and test this package with the following commands (from the project root folder):
 
 ```sh
-cd tests && typst c strfmt-tests.typ --root ..
+git clone https://github.com/PgBiel/typst-oxifmt
+cd typst-oxifmt/tests
+typst c strfmt-tests.typ --root ..
 ```
+
+The tests succeeded if you received no error messages from the last command (please ensure you're using a supported Typst version).
 
 ## Changelog
 
