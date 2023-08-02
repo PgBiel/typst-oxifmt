@@ -180,13 +180,22 @@
   }
   let result = _strfmt_stringify(calc.round(float(num), digits: calc.min(50, precision)))
   let digits-match = result.match(regex("^\\d+\\.(\\d+)$"))
+  let digits-len-diff = 0
   if digits-match != none and digits-match.captures.len() > 0 {
+    // get the digits capture group; its length will be digit amount
     let digits = digits-match.captures.first()
-    let digits-len-diff = precision - digits.len()
-    // add missing zeroes for precision
-    if digits-len-diff > 0 {
-      result += "0" * digits-len-diff
+    digits-len-diff = precision - digits.len()
+  } else if "." not in result {  // 5.0 or something
+    // 0 digits! Difference will be exactly 'precision'
+    digits-len-diff = precision
+  }
+
+  // add missing zeroes for precision
+  if digits-len-diff > 0 {
+    if "." not in result {
+      result += "."  // decimal separator missing
     }
+    result += "0" * digits-len-diff
   }
 
   result

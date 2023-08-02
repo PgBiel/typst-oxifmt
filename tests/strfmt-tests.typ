@@ -34,6 +34,9 @@
     // test taking width and precision from pos args / named args (.x$ / y$ notation)
     assert.eq(strfmt("{:.1$}; {woah:0france$.moment$}; {}; {2:a>1$}", 5.5399234, 9, "stringy", woah: 3.9, france: 7, moment: 2), "5.539923400; 0003.90; 9; aastringy")
 
+    // test weird precision cases
+    assert.eq(strfmt("{0:e} {0:+.9E} | {1:.3e} {1:.3} {2:.3} | {3:.4} {3:.4E} | {4:.2} {4:.3} {4:.5}", 124.2312, 50, 50.0, -0.02, 2.44454), "1.242312e2 +1.242312000E2 | 5.000e1 50 50.000 | -0.0200 -2.0000E-2 | 2.44 2.445 2.44454")
+
     // test custom decimal separators (I)
     assert.eq(strfmt("{}; {:07e}; {}; {}; {:?}", 1.532, 45000, -5.6, "a.b", "c.d", fmt-decimal-separator: ","), "1,532; 004,5e4; -5,6; a.b; \"c.d\"")
 
