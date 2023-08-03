@@ -1,4 +1,4 @@
-// typst-oxifmt v0.1.1 (WIP)
+// oxifmt v0.2.0
 #let _strfmt_formatparser(s) = {
   if type(s) != "string" {
     panic("String format parsing internal error: String format parser given non-string.")
@@ -317,7 +317,7 @@ parameter := argument '$'
   let valid-specs = ("", "?", "b", "x", "X", "o", "x?", "X?", "e", "E")
   let spec-error() = {
     panic(
-      "String formatter error: Unknown spec type '" + spectype + "', from '{" + fullname.replace("{", "{{").replace("}", "}}") + "}'. Valid options include: '" + valid-specs.join("', '") + "'. Maybe you specified some invalid formatting spec syntax (after the ':'), which can also prompt this error. Check the typst-oxifmt docs for more information.")
+      "String formatter error: Unknown spec type '" + spectype + "', from '{" + fullname.replace("{", "{{").replace("}", "}}") + "}'. Valid options include: '" + valid-specs.join("', '") + "'. Maybe you specified some invalid formatting spec syntax (after the ':'), which can also prompt this error. Check the oxifmt docs for more information.")
   }
   if spectype not in valid-specs {
     spec-error()
