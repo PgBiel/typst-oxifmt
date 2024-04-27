@@ -148,7 +148,11 @@
 }
 
 #let _strfmt_stringify(obj) = {
-  if type(obj) in (_int-type, _float-type, _label-type, _str-type) {
+  if type(obj) in (_int-type, _float-type) {
+    // Fix negative sign not being a hyphen
+    // for consistency with our rich formatting output
+    str(obj).replace("\u{2212}", "-")
+  } else if type(obj) in (_label-type, _str-type) {
     str(obj)
   } else {
     repr(obj)
@@ -215,7 +219,7 @@
   let mantissa = f / calc.pow(10, exponent)
   let mantissa = _strfmt_with-precision(mantissa, precision)
 
-  mantissa + exponent-sign + str(exponent)
+  mantissa + exponent-sign + _strfmt_stringify(exponent)
 }
 
 // Parses {format:specslikethis}.
