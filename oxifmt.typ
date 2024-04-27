@@ -1,6 +1,13 @@
-// oxifmt v0.2.0
+// oxifmt v0.2.1
+
+// For compatibility with pre-0.8.0 Typst types, which were strings
+#let _int-type = type(0)
+#let _float-type = type(5.5)
+#let _str-type = type("")
+#let _label-type = type(<hello>)
+
 #let _strfmt_formatparser(s) = {
-  if type(s) != "string" {
+  if type(s) != _str-type {
     panic("String format parsing internal error: String format parser given non-string.")
   }
   let result = ()
@@ -124,7 +131,7 @@
   let subparts = name.match(regex("^([^:]*)(?::(.*))?$")).captures
   let name = subparts.at(0)
   let extras = subparts.at(1)
-  let name = if type(name) != "string" {
+  let name = if type(name) != _str-type {
     name
   } else if name == "" {
     none
@@ -137,11 +144,11 @@
 }
 
 #let _strfmt_is-numeric-type(obj) = {
-  type(obj) in ("integer", "float")
+  type(obj) in (_int-type, _float-type)
 }
 
 #let _strfmt_stringify(obj) = {
-  if type(obj) in ("integer", "float", "label", "string") {
+  if type(obj) in (_int-type, _float-type, _label-type, _str-type) {
     str(obj)
   } else {
     repr(obj)
@@ -150,7 +157,7 @@
 
 #let _strfmt_display-radix(num, radix, signed: true, lowercase: false) = {
   let num = int(num)
-  if type(radix) != "integer" or num == 0 or radix <= 1 {
+  if type(radix) != _int-type or num == 0 or radix <= 1 {
     return "0"
   }
   let sign = if num < 0 and signed { "-" } else { "" }
@@ -266,7 +273,7 @@ parameter := argument '$'
       )
       let arg = pos-replacements.at(i)
       assert(
-        type(arg) == "integer",
+        type(arg) == _int-type,
         message: "String formatter error: Attempted to use positional argument " + str(i) + " for " + spec-part-name + ", but it was a(n) '" + type(arg) + "', not an integer (from '{" + fullname.replace("{", "{{").replace("}", "}}") + "}')."
       )
 
@@ -282,7 +289,7 @@ parameter := argument '$'
       )
       let arg = named-replacements.at(named)
       assert(
-        type(arg) == "integer",
+        type(arg) == _int-type,
         message: "String formatter error: Attempted to use named argument '" + named + "' for " + spec-part-name + ", but it was a(n) '" + type(arg) + "', not an integer (from '{" + fullname.replace("{", "{{").replace("}", "}}") + "}')."
       )
 
@@ -352,9 +359,9 @@ parameter := argument '$'
     if spectype in ("e", "E") {
       let exponent-sign = if spectype == "E" { "E" } else { "e" }
       replacement = _strfmt_exp-format(calc.abs(replacement), exponent-sign: exponent-sign, precision: precision)
-    } else if type(replacement) != "integer" and precision != none {
+    } else if type(replacement) != _int-type and precision != none {
       replacement = _strfmt_with-precision(replacement, precision)
-    } else if type(replacement) == "integer" and spectype in ("x", "X", "b", "o", "x?", "X?") {
+    } else if type(replacement) == _int-type and spectype in ("x", "X", "b", "o", "x?", "X?") {
       let radix-map = (x: 16, X: 16, "x?": 16, "X?": 16, b: 2, o: 8)
       let radix = radix-map.at(spectype)
       let lowercase = spectype.starts-with("x")
@@ -453,7 +460,7 @@ parameter := argument '$'
         }
         replace-by = num-replacements.at(fmt-index)
         unnamed-format-index += 1
-      } else if type(name) == "integer" {
+      } else if type(name) == _int-type {
         let fmt-index = name
         let amount-pos-replacements = num-replacements.len()
         if amount-pos-replacements == 0 {
