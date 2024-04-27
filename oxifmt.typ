@@ -20,11 +20,10 @@
   let last-was-lbracket = false
   // if the last character was an unescaped }
   let last-was-rbracket = false
-  let last-i = 0
 
   // -- procedures --
-  let write-format-span(i, result, current-fmt-span, current-fmt-name) = {
-    current-fmt-span.at(1) = i  // end index
+  let write-format-span(last-i, result, current-fmt-span, current-fmt-name) = {
+    current-fmt-span.at(1) = last-i + 1  // end index
     result.push((format: (name: current-fmt-name, span: current-fmt-span)))
     current-fmt-span = none
     current-fmt-name = none
@@ -43,14 +42,15 @@
   }
 
   // -- parse loop --
-  for (i, character) in codepoints.enumerate() {
-    last-i = i
+  let last-i = none
+  let i = 0
+  for character in codepoints {
     if character == "{" {
       // double l-bracket = escape
       if last-was-lbracket {
         last-was-lbracket = false  // escape {{
         last-was-rbracket = false
-        if current-fmt-span.at(0) == i - 1 {
+        if current-fmt-span.at(0) == last-i {
           current-fmt-span = none  // cancel this span
           current-fmt-name = none
         }
@@ -60,13 +60,16 @@
           current-fmt-name += character
         } else {
           // outside a span ({...} {{ <-) => emit an 'escaped' token
-          result.push((escape: (escaped: "{", span: (i - 1, i + 1))))
+          result.push((escape: (escaped: "{", span: (last-i, i + 1))))
         }
+
+        last-i = i
+        i += 1  // '{' is ASCII, so 1 byte
         continue
       }
       if last-was-rbracket {
         // { ... }{ <--- ok, close the previous span
-        (result, current-fmt-span, current-fmt-name) = write-format-span(i, result, current-fmt-span, current-fmt-name)
+        (result, current-fmt-span, current-fmt-name) = write-format-span(last-i, result, current-fmt-span, current-fmt-name)
         last-was-rbracket = false
       }
       if current-fmt-span == none {
@@ -82,8 +85,11 @@
         if current-fmt-name != none {
           current-fmt-name += character
         } else {
-          result.push((escape: (escaped: "}", span: (i - 1, i + 1))))
+          result.push((escape: (escaped: "}", span: (last-i, i + 1))))
         }
+
+        last-i = i
+        i += 1  // '}' is ASCII, so 1 byte
         continue
       }
       // delay closing the span to the next iteration
@@ -91,7 +97,7 @@
       last-was-rbracket = true
     } else {
       // { ... {A  <--- non-escaped { inside larger {}
-      if last-was-lbracket and (current-fmt-span != none and current-fmt-span.at(0) != i - 1) {
+      if last-was-lbracket and (current-fmt-span != none and current-fmt-span.at(0) != last-i) {
         excessive-lbracket()
       }
       if last-was-rbracket {
@@ -100,7 +106,7 @@
           excessive-rbracket()
         } else {
           // { ... }A <--- ok, close the previous span
-          (result, current-fmt-span, current-fmt-name) = write-format-span(i, result, current-fmt-span, current-fmt-name)
+          (result, current-fmt-span, current-fmt-name) = write-format-span(last-i, result, current-fmt-span, current-fmt-name)
         }
       }
       // {abc <--- add character to the format name
@@ -110,12 +116,15 @@
       last-was-lbracket = false
       last-was-rbracket = false
     }
+
+    last-i = i
+    i += character.len() // index must be in bytes, and a UTF-8 codepoint can have more than one byte
   }
   // { ...
   if current-fmt-span != none {
     if last-was-rbracket {
       // ... } <--- ok, close span
-      (result, current-fmt-span, current-fmt-name) = write-format-span(last-i + 1, result, current-fmt-span, current-fmt-name)
+      (result, current-fmt-span, current-fmt-name) = write-format-span(last-i, result, current-fmt-span, current-fmt-name)
     } else {
       // {abcd| <--- string ended with unclosed span
       missing-rbracket()

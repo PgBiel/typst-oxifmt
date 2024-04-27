@@ -46,6 +46,17 @@
   // test custom decimal separators (III) - ensure we can fetch it from inside
   assert.eq(strfmt("5{fmt-decimal-separator}6", fmt-decimal-separator: "|"), "5|6")
 }
+// Issue #6: UTF-8
+#{
+  // shouldn't crash
+  assert.eq(strfmt("Hello € {}", "man"), "Hello € man")
+
+  // should replace at the appropriate location
+  assert.eq(strfmt("Bank: {company-bank-name} € IBAN: {company-bank-iban}", company-bank-name: "FAKE", company-bank-iban: "Broken stuff"), "Bank: FAKE € IBAN: Broken stuff")
+
+  // test grapheme clusters
+  assert.eq(strfmt("Ĺo͂řȩ{}m̅", 5.5), "Ĺo͂řȩ5.5m̅")
+}
 // DOC TESTS
 #{
   // --- Usage ---
