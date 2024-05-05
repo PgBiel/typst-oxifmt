@@ -1,4 +1,4 @@
-# typst-oxifmt (v0.2.0)
+# typst-oxifmt (v0.2.1)
 
 A Typst library that brings convenient string formatting and interpolation through the `strfmt` function. Its syntax is taken directly from Rust's `format!` syntax, so feel free to read its page for more information (https://doc.rust-lang.org/std/fmt/); however, this README should have enough information and examples for all expected uses of the library. Only a few things aren't supported from the Rust syntax, such as the `p` (pointer) format type, or the `.*` precision specifier.
 
@@ -213,6 +213,12 @@ typst c strfmt-tests.typ --root ..
 The tests succeeded if you received no error messages from the last command (please ensure you're using a supported Typst version).
 
 ## Changelog
+
+### v0.2.1
+
+- Fixed formatting of UTF-8 strings. Before, strings with multi-byte UTF-8 codepoints would cause formatting inconsistencies or even crashes. ([Issue #6](https://github.com/PgBiel/typst-oxifmt/issues/6))
+- Fixed an inconsistency in negative number formatting. Now, it will always print a regular hyphen (e.g. '-2'), which is consistent with Rust's behavior; before, it would occasionally print a minus sign instead (as observed in a comment to [Issue #4](https://github.com/PgBiel/typst-oxifmt/issues/4)).
+- Added compatibility with Typst 0.8.0's new type system.
 
 ### v0.2.0
 
