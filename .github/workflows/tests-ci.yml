@@ -33,7 +33,7 @@ jobs:
         uses: typst-community/setup-typst@v3
         id: setup-typst
         with:
-          version: ${{ matrix.typst-version }}
+          typst-version: ${{ matrix.typst-version }}
 
       - name: 🛠️ Compile test document
         run: "typst compile tests/strfmt-tests.typ --root ."
