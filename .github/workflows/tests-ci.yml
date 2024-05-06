@@ -37,7 +37,7 @@ jobs:
 
       - name: 🛠️ Compile test document (<v0.7.0)
         if: ${{ matrix.typst-version != 'v0.11.0' }}
-        run: "typst compile --root . tests/strfmt-tests.typ"
+        run: "typst --root . compile tests/strfmt-tests.typ"
 
       - name: 🛠️ Compile test document (v0.7.0+)
         if: ${{ matrix.typst-version == 'v0.11.0' }}
