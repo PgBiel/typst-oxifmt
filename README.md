@@ -21,13 +21,13 @@ A few extras (beyond the Rust-like syntax) will be added over time, though (feel
 
 You can use this library through Typst's package manager (for Typst v0.6.0+):
 
-```js
+```typ
 #import "@preview/oxifmt:0.2.0": strfmt
 ```
 
 For older Typst versions, download the `oxifmt.typ` file either from Releases or directly from the repository. Then, move it to your project's folder, and write at the top of your Typst file(s):
 
-```js
+```typ
 #import "oxifmt.typ": strfmt
 ```
 
@@ -35,7 +35,7 @@ Doing the above will give you access to the main function provided by this libra
 
 Its syntax is almost identical to Rust's `format!` (as specified here: https://doc.rust-lang.org/std/fmt/). You can escape formats by duplicating braces (`{{` and `}}` become `{` and `}`). Here's an example (see more examples in the file `tests/strfmt-tests.typ`):
 
-```js
+```typ
 #import "@preview/oxifmt:0.2.0": strfmt
 
 #let s = strfmt("I'm {}. I have {num} cars. I'm {0}. {} is {{cool}}.", "John", "Carl", num: 10)
@@ -73,7 +73,7 @@ You can use `{:spec}` to customize your output. See the Rust docs linked above f
 
 Some examples:
 
-```js
+```typ
 #import "@preview/oxifmt:0.2.0": strfmt
 
 #let s1 = strfmt("{0:?}, {test:+012e}, {1:-<#8x}", "hi", -74, test: 569.4)
@@ -89,7 +89,7 @@ Some examples:
 ### Examples
 
 - **Inserting labels, text and numbers into strings:**
-```js
+```typ
 #import "@preview/oxifmt:0.2.0": strfmt
 
 #let s = strfmt("First: {}, Second: {}, Fourth: {3}, Banana: {banana} (brackets: {{escaped}})", 1, 2.1, 3, label("four"), banana: "Banana!!")
@@ -97,7 +97,7 @@ Some examples:
 ```
 
 - **Forcing `repr()` with `{:?}`** (which adds quotes around strings, and other things - basically represents a Typst value):
-```js
+```typ
 #import "@preview/oxifmt:0.2.0": strfmt
 
 #let s = strfmt("The value is: {:?} | Also the label is {:?}", "something", label("label"))
@@ -105,7 +105,7 @@ Some examples:
 ```
 
 - **Inserting other types than numbers and strings** (for now, they will always use `repr()`, even without `{...:?}`, although that is more explicit):
-```js
+```typ
 #import "@preview/oxifmt:0.2.0": strfmt
 
 #let s = strfmt("Values: {:?}, {1:?}, {stuff:?}", (test: 500), ("a", 5.1), stuff: [a])
@@ -113,7 +113,7 @@ Some examples:
 ```
 
 - **Padding to a certain width with characters:** Use `{:x<8}`, where `x` is the **character to pad with** (e.g. space or `_`, but can be anything), `<` is the **alignment of the original text** relative to the padding (can be `<` for left aligned (padding goes to the right), `>` for right aligned (padded to its left) and `^` for center aligned (padded at both left and right)), and `8` is the **desired total width** (padding will add enough characters to reach this width; if the replacement string already has this width, no padding will be added):
-```js
+```typ
 #import "@preview/oxifmt:0.2.0": strfmt
 
 #let s = strfmt("Left5 {:_<5}, Right6 {:*>6}, Center10 {centered: ^10?}, Left3 {tleft:_<3}", "xx", 539, tleft: "okay", centered: [a])
@@ -122,7 +122,7 @@ Some examples:
 ```
 
 - **Padding numbers with zeroes to the left:** It's a similar functionality to the above, however you write `{:08}` for 8 characters (for instance) - note that any characters in the number's representation matter for width (including sign, dot and decimal part):
-```js
+```typ
 #import "@preview/oxifmt:0.2.0": strfmt
 
 #let s = strfmt("Left-padded7 numbers: {:07} {:07} {:07} {3:07}", 123, -344, 44224059, 45.32)
@@ -130,7 +130,7 @@ Some examples:
 ```
 
 - **Defining padding-to width using parameters, not literals:** If you want the desired replacement width (the `8` in `{:08}` or `{: ^8}`) to be passed via parameter (instead of being hardcoded into the format string), you can specify `parameter$` in place of the width, e.g. `{:02$}` to take it from the third positional parameter, or `{:a>banana$}` to take it from the parameter named `banana` - note that the chosen parameter **must be an integer** (desired total width):
-```js
+```typ
 #import "@preview/oxifmt:0.2.0": strfmt
 
 #let s = strfmt("Padding depending on parameter: {0:02$} and {0:a>banana$}", 432, 0, 5, banana: 9)
@@ -138,7 +138,7 @@ Some examples:
 ```
 
 - **Displaying `+` on positive numbers:** Just add a `+` at the "beginning", i.e., before the `#0` (if either is there), or after the custom fill and align (if it's there and not `0` - see [Grammar](#grammar) for the exact positioning), like so:
-```js
+```typ
 #import "@preview/oxifmt:0.2.0": strfmt
 
 #let s = strfmt("Some numbers: {:+} {:+08}; With fill and align: {:_<+8}; Negative (no-op): {neg:+}", 123, 456, 4444, neg: -435)
@@ -147,7 +147,7 @@ Some examples:
 ```
 
 - **Converting numbers to bases 2, 8 and 16:** Use one of the following specifier types (i.e., characters which always go at the very end of the format): `b` (binary), `o` (octal), `x` (lowercase hexadecimal) or `X` (uppercase hexadecimal). You can also add a `#` between `+` and `0` (see the exact position at the [Grammar](#grammar)) to display a **base prefix** before the number (i.e. `0b` for binary, `0o` for octal and `0x` for hexadecimal):
-```js
+```typ
 #import "@preview/oxifmt:0.2.0": strfmt
 
 #let s = strfmt("Bases (10, 2, 8, 16(l), 16(U):) {0} {0:b} {0:o} {0:x} {0:X} | W/ prefixes and modifiers: {0:#b} {0:+#09o} {0:_>+#9X}", 124)
@@ -155,7 +155,7 @@ Some examples:
 ```
 
 - **Picking float precision (right-extending with zeroes):** Add, at the end of the format (just before the spec type (such as `?`), if there's any), either `.precision` (hardcoded, e.g. `.8` for 8 decimal digits) or `.parameter$` (taking the precision value from the specified parameter, like with `width`):
-```js
+```typ
 #import "@preview/oxifmt:0.2.0": strfmt
 
 #let s = strfmt("{0:.8} {0:.2$} {0:.potato$}", 1.234, 0, 2, potato: 5)
@@ -163,7 +163,7 @@ Some examples:
 ```
 
 - **Scientific notation:** Use `e` (lowercase) or `E` (uppercase) as specifier types (can be combined with precision):
-```js
+```typ
 #import "@preview/oxifmt:0.2.0": strfmt
 
 #let s = strfmt("{0:e} {0:E} {0:+.9e} | {1:e} | {2:.4E}", 124.2312, 50, -0.02)
@@ -171,7 +171,7 @@ Some examples:
 ```
 
 - **Customizing the decimal separator on floats:** Just specify `fmt-decimal-separator: ","` (comma as an example):
-```js
+```typ
 #import "@preview/oxifmt:0.2.0": strfmt
 
 #let s = strfmt("{0} {0:.6} {0:.5e}", 1.432, fmt-decimal-separator: ",")
