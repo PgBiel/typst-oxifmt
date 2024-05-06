@@ -1,0 +1,39 @@
+name: Tests CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the branches below
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows one to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        # Test for the following Typst versions
+        # 0.4.0 (earliest supported), 0.6.0 (first version with package management),
+        # 0.11.0 (latest supported)
+        typst-version: [v0.4.0, v0.6.0, v0.11.0]
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+
+      - name: 📥 Setup Typst
+        uses: typst-community/setup-typst@v3
+        id: setup-typst
+        with:
+          version: ${{ matrix.typst-version }}
+
+      - name: 🛠️ Compile test document
+        run: "typst compile tests/strfmt-tests.typ --root ."
