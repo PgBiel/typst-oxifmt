@@ -116,8 +116,8 @@ Some examples:
 ```typ
 #import "@preview/oxifmt:0.2.1": strfmt
 
-#let s = strfmt("Left5 {:_<5}, Right6 {:=>6}, Center10 {centered: ^10?}, Left3 {tleft:_<3}", "xx", 539, tleft: "okay", centered: [a])
-#assert.eq(s, "Left5 xx___, Right6 ===539, Center10     [a]    , Left3 okay")
+#let s = strfmt("Left5 {:-<5}, Right6 {:=>6}, Center10 {centered: ^10?}, Left3 {tleft:_<3}", "xx", 539, tleft: "okay", centered: [a])
+#assert.eq(s, "Left5 xx---, Right6 ===539, Center10     [a]    , Left3 okay")
 // note how 'okay' didn't suffer any padding at all (it already had at least the desired total width).
 ```
 
