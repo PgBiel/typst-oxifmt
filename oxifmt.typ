@@ -244,16 +244,42 @@ type := '' | '?' | 'x?' | 'X?' | identifier
 count := parameter | integer
 parameter := argument '$'
 */
-#let _generate-replacement(fullname, extras, replacement, pos-replacements: (), named-replacements: (:), fmt-decimal-separator: auto) = {
+#let _generate-replacement(
+  fullname, extras, replacement,
+  pos-replacements: (), named-replacements: (:),
+  fmt-decimal-separator: auto,
+  fmt-thousands-separator: ""
+) = {
   if extras == none {
-    if not _strfmt_is-numeric-type(replacement) {
-      fmt-decimal-separator = auto
+    let is-numeric = _strfmt_is-numeric-type(replacement)
+    let string-replacement = _strfmt_stringify(replacement)
+
+    if is-numeric {
+      let (integral, ..fractional) = string-replacement.split(".")
+      if fmt-thousands-separator != "" {
+        assert(
+          type(fmt-thousands-separator) == _str-type,
+          message: "String formatter error: 'fmt-thousands-separator' must be a string (or empty string, \"\", to disable)."
+        )
+        integral = str(
+          bytes(
+            array(bytes(integral.rev()))
+              .chunks(3)
+              .intersperse(array(bytes(fmt-thousands-separator.rev())))
+              .join()
+          )
+        ).rev()
+      }
+
+      if fractional.len() > 0 {
+        let decimal-separator = if fmt-decimal-separator not in (auto, none) { _strfmt_stringify(fmt-decimal-separator) } else { "." }
+        return integral + decimal-separator + fractional.first()
+      } else {
+        return integral
+      }
+    } else {
+      return string-replacement
     }
-    replacement = _strfmt_stringify(replacement)
-    if fmt-decimal-separator not in (auto, none) {
-      replacement = replacement.replace(".", _strfmt_stringify(fmt-decimal-separator))
-    }
-    return replacement
   }
   let extras = _strfmt_stringify(extras)
   // note: usage of [\s\S] in regex to include all characters, incl. newline
@@ -369,37 +395,64 @@ parameter := argument '$'
     // we'll add the sign back later!
     replacement = calc.abs(replacement)
 
+    // Separate integral from fractional parts
+    // We'll recompose them later
+    let integral = ""
+    let fractional = ()
+
     if spectype in ("e", "E") {
       let exponent-sign = if spectype == "E" { "E" } else { "e" }
-      replacement = _strfmt_exp-format(calc.abs(replacement), exponent-sign: exponent-sign, precision: precision)
+      let new-replacement = _strfmt_exp-format(calc.abs(replacement), exponent-sign: exponent-sign, precision: precision)
+      (integral, ..fractional) = new-replacement.split(".")
     } else if type(replacement) != _int-type and precision != none {
-      replacement = _strfmt_with-precision(replacement, precision)
+      let new-replacement = _strfmt_with-precision(replacement, precision)
+      (integral, ..fractional) = new-replacement.split(".")
     } else if type(replacement) == _int-type and spectype in ("x", "X", "b", "o", "x?", "X?") {
       let radix-map = (x: 16, X: 16, "x?": 16, "X?": 16, b: 2, o: 8)
       let radix = radix-map.at(spectype)
       let lowercase = spectype.starts-with("x")
-      replacement = _strfmt_stringify(_strfmt_display-radix(replacement, radix, lowercase: lowercase, signed: false))
+      integral = _strfmt_stringify(_strfmt_display-radix(replacement, radix, lowercase: lowercase, signed: false))
       if hashtag {
         let hashtag-prefix-map = ("16": "0x", "2": "0b", "8": "0o")
         hashtag-prefix = hashtag-prefix-map.at(str(radix))
       }
     } else {
       precision = none
-      replacement = if spectype.ends-with("?") {
+      let new-replacement = if spectype.ends-with("?") {
         repr(replacement)
       } else {
         _strfmt_stringify(replacement)
       }
+      (integral, ..fractional) = new-replacement.split(".")
     }
-    if fmt-decimal-separator not in (auto, none) {
-      replacement = replacement.replace(".", _strfmt_stringify(fmt-decimal-separator))
+
+    if fmt-thousands-separator != "" {
+      assert(
+        type(fmt-thousands-separator) == _str-type,
+        message: "String formatter error: 'fmt-thousands-separator' must be a string (or empty string, \"\", to disable)."
+      )
+      integral = str(
+        bytes(
+          array(bytes(integral.rev()))
+            .chunks(3)
+            .intersperse(array(bytes(fmt-thousands-separator.rev())))
+            .join()
+        )
+      ).rev()
     }
+    let expected-thousand-len = fmt-thousands-separator.len() * int(calc.max(0, (integral.len() - 1)) / 3)
+    let decimal-separator = if fmt-decimal-separator not in (auto, none) { _strfmt_stringify(fmt-decimal-separator) } else { "." }
+    let replaced-fractional = if fractional.len() > 0 { decimal-separator + fractional.join(decimal-separator) } else { "" }
+
     if zero {
-      let width-diff = width - (replacement.len() + sign.len() + hashtag-prefix.len())
+      let width-diff = width - (integral.len() + expected-thousand-len + replaced-fractional.len() + sign.len() + hashtag-prefix.len())
       if width-diff > 0 {  // prefix with the appropriate amount of zeroes
-        replacement = ("0" * width-diff) + replacement
+        integral = ("0" * width-diff) + integral
       }
     }
+
+
+    replacement = integral + replaced-fractional
   } else {
     sign = ""
     hashtag-prefix = ""
@@ -449,6 +502,7 @@ parameter := argument '$'
   let named-replacements = replacements.named()
   let unnamed-format-index = 0
   let fmt-decimal-separator = if "fmt-decimal-separator" in named-replacements { named-replacements.at("fmt-decimal-separator") } else { auto }
+  let fmt-thousands-separator = if "fmt-thousands-separator" in named-replacements { named-replacements.at("fmt-thousands-separator") } else { "" }
 
   let parts = ()
   let last-span-end = 0
@@ -490,7 +544,7 @@ parameter := argument '$'
         }
         replace-by = named-replacements.at(name)
       }
-      replace-by = _generate-replacement(f.name, extras, replace-by, pos-replacements: num-replacements, named-replacements: named-replacements, fmt-decimal-separator: fmt-decimal-separator)
+      replace-by = _generate-replacement(f.name, extras, replace-by, pos-replacements: num-replacements, named-replacements: named-replacements, fmt-decimal-separator: fmt-decimal-separator, fmt-thousands-separator: fmt-thousands-separator)
       replace-span = f.span
     } else {
       panic("String formatter error: Internal error (unexpected format received).")
