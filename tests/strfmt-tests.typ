@@ -57,6 +57,32 @@
   // test grapheme clusters
   assert.eq(strfmt("Ĺo͂řȩ{}m̅", 5.5), "Ĺo͂řȩ5.5m̅")
 }
+// Issue #5: Thousands
+#{
+  // Test separator
+  assert.eq(strfmt("{}", 10, fmt-thousands-separator: "_"), "10")
+  assert.eq(strfmt("{}", 1000, fmt-thousands-separator: ""), "1000")
+  assert.eq(strfmt("{}", 1000, fmt-thousands-separator: "_"), "1_000")
+  assert.eq(strfmt("{}", 100000000, fmt-thousands-separator: "_"), "100_000_000")
+  assert.eq(strfmt("{}", 10000000.3231, fmt-thousands-separator: "_"), "10_000_000.3231")
+  assert.eq(strfmt("{:010}", -23003, fmt-thousands-separator: "abc"), "-000abc023abc003")
+  assert.eq(strfmt("{:+013}", 23003.34, fmt-thousands-separator: "abc"), "+000abc023abc003.34")
+  assert.eq(strfmt("{:#b}", 255, fmt-thousands-separator: "_"), "0b11_111_111")
+  assert.eq(strfmt("{:#x}", -16 * 16 * 16 * 16 * 15, fmt-thousands-separator: "_"), "-0xf0_000")
+  assert.eq(strfmt("{:o}", -16 * 16 * 16 * 16 * 15, fmt-thousands-separator: "_"), "-3_600_000")
+  assert.eq(strfmt("{:e}", 5555.2, fmt-thousands-separator: "_", fmt-decimal-separator: "heap"), "5heap5552e3")
+  assert.eq(strfmt("{:e}", 5555.2, fmt-thousands-separator: "_", fmt-decimal-separator: "heap"), "5heap5552e3")
+
+  // Test count
+  assert.eq(strfmt("{}", 10, fmt-thousands-count: 3, fmt-thousands-separator: "_"), "10")
+  assert.eq(strfmt("{}", 10, fmt-thousands-count: 1, fmt-thousands-separator: "_"), "1_0")
+  assert.eq(strfmt("{}", 1000, fmt-thousands-count: 2, fmt-thousands-separator: "_"), "10_00")
+  assert.eq(strfmt("{}", 10000000.3231, fmt-thousands-count: 2, fmt-thousands-separator: "_"), "10_00_00_00.3231")
+  assert.eq(strfmt("{:010}", -23003, fmt-thousands-count: 4, fmt-thousands-separator: "|"), "-0|0002|3003")
+  assert.eq(strfmt("{:#b}", 255, fmt-thousands-count: 1, fmt-thousands-separator: "_"), "0b1_1_1_1_1_1_1_1")
+  assert.eq(strfmt("{:#x}", -16 * 16 * 16 * 16 * 15, fmt-thousands-count: 2, fmt-thousands-separator: "_"), "-0xf_00_00")
+  assert.eq(strfmt("{:o}", -16 * 16 * 16 * 16 * 15, fmt-thousands-count: 4, fmt-thousands-separator: "_"), "-360_0000")
+}
 // DOC TESTS
 #{
   // --- Usage ---

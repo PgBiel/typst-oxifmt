@@ -228,7 +228,7 @@
   let mantissa = f / calc.pow(10, exponent)
   let mantissa = _strfmt_with-precision(mantissa, precision)
 
-  mantissa + exponent-sign + _strfmt_stringify(exponent)
+  (mantissa, exponent-sign + _strfmt_stringify(exponent))
 }
 
 // Parses {format:specslikethis}.
@@ -248,6 +248,7 @@ parameter := argument '$'
   fullname, extras, replacement,
   pos-replacements: (), named-replacements: (:),
   fmt-decimal-separator: auto,
+  fmt-thousands-count: 3,
   fmt-thousands-separator: ""
 ) = {
   if extras == none {
@@ -257,14 +258,10 @@ parameter := argument '$'
     if is-numeric {
       let (integral, ..fractional) = string-replacement.split(".")
       if fmt-thousands-separator != "" {
-        assert(
-          type(fmt-thousands-separator) == _str-type,
-          message: "String formatter error: 'fmt-thousands-separator' must be a string (or empty string, \"\", to disable)."
-        )
         integral = str(
           bytes(
             array(bytes(integral.rev()))
-              .chunks(3)
+              .chunks(fmt-thousands-count)
               .intersperse(array(bytes(fmt-thousands-separator.rev())))
               .join()
           )
@@ -399,11 +396,13 @@ parameter := argument '$'
     // We'll recompose them later
     let integral = ""
     let fractional = ()
+    let exponent-suffix = ""
 
     if spectype in ("e", "E") {
       let exponent-sign = if spectype == "E" { "E" } else { "e" }
-      let new-replacement = _strfmt_exp-format(calc.abs(replacement), exponent-sign: exponent-sign, precision: precision)
-      (integral, ..fractional) = new-replacement.split(".")
+      let (mantissa, exponent) = _strfmt_exp-format(calc.abs(replacement), exponent-sign: exponent-sign, precision: precision)
+      (integral, ..fractional) = mantissa.split(".")
+      exponent-suffix = exponent
     } else if type(replacement) != _int-type and precision != none {
       let new-replacement = _strfmt_with-precision(replacement, precision)
       (integral, ..fractional) = new-replacement.split(".")
@@ -426,33 +425,30 @@ parameter := argument '$'
       (integral, ..fractional) = new-replacement.split(".")
     }
 
-    if fmt-thousands-separator != "" {
-      assert(
-        type(fmt-thousands-separator) == _str-type,
-        message: "String formatter error: 'fmt-thousands-separator' must be a string (or empty string, \"\", to disable)."
-      )
-      integral = str(
-        bytes(
-          array(bytes(integral.rev()))
-            .chunks(3)
-            .intersperse(array(bytes(fmt-thousands-separator.rev())))
-            .join()
-        )
-      ).rev()
-    }
-    let expected-thousand-len = fmt-thousands-separator.len() * int(calc.max(0, (integral.len() - 1)) / 3)
     let decimal-separator = if fmt-decimal-separator not in (auto, none) { _strfmt_stringify(fmt-decimal-separator) } else { "." }
     let replaced-fractional = if fractional.len() > 0 { decimal-separator + fractional.join(decimal-separator) } else { "" }
+    let exponent-suffix = exponent-suffix.replace(".", decimal-separator)
 
     if zero {
-      let width-diff = width - (integral.len() + expected-thousand-len + replaced-fractional.len() + sign.len() + hashtag-prefix.len())
+      let width-diff = width - (integral.len() + replaced-fractional.len() + sign.len() + hashtag-prefix.len() + exponent-suffix.len())
       if width-diff > 0 {  // prefix with the appropriate amount of zeroes
         integral = ("0" * width-diff) + integral
       }
     }
 
+    // Format with thousands AFTER zeroes, but BEFORE applying textual prefixes
+    if fmt-thousands-separator != "" {
+      integral = str(
+        bytes(
+          array(bytes(integral.rev()))
+            .chunks(fmt-thousands-count)
+            .intersperse(array(bytes(fmt-thousands-separator.rev())))
+            .join()
+        )
+      ).rev()
+    }
 
-    replacement = integral + replaced-fractional
+    replacement = integral + replaced-fractional + exponent-suffix
   } else {
     sign = ""
     hashtag-prefix = ""
@@ -502,7 +498,21 @@ parameter := argument '$'
   let named-replacements = replacements.named()
   let unnamed-format-index = 0
   let fmt-decimal-separator = if "fmt-decimal-separator" in named-replacements { named-replacements.at("fmt-decimal-separator") } else { auto }
+  let fmt-thousands-count = if "fmt-thousands-count" in named-replacements { named-replacements.at("fmt-thousands-count") } else { 3 }
   let fmt-thousands-separator = if "fmt-thousands-separator" in named-replacements { named-replacements.at("fmt-thousands-separator") } else { "" }
+
+  assert(
+    type(fmt-thousands-count) == _int-type,
+    message: "String formatter error: 'fmt-thousands-count' must be an integer, got '" + type(fmt-thousands-count) + "' instead."
+  )
+  assert(
+    fmt-thousands-count > 0,
+    message: "String formatter error: 'fmt-thousands-count' must be a positive integer, got " + str(fmt-thousands-count) + " instead."
+  )
+  assert(
+    type(fmt-thousands-separator) == _str-type,
+    message: "String formatter error: 'fmt-thousands-separator' must be a string (or empty string, \"\", to disable), got '" + type(fmt-thousands-separator) + "' instead."
+  )
 
   let parts = ()
   let last-span-end = 0
@@ -544,7 +554,7 @@ parameter := argument '$'
         }
         replace-by = named-replacements.at(name)
       }
-      replace-by = _generate-replacement(f.name, extras, replace-by, pos-replacements: num-replacements, named-replacements: named-replacements, fmt-decimal-separator: fmt-decimal-separator, fmt-thousands-separator: fmt-thousands-separator)
+      replace-by = _generate-replacement(f.name, extras, replace-by, pos-replacements: num-replacements, named-replacements: named-replacements, fmt-decimal-separator: fmt-decimal-separator, fmt-thousands-count: fmt-thousands-count, fmt-thousands-separator: fmt-thousands-separator)
       replace-span = f.span
     } else {
       panic("String formatter error: Internal error (unexpected format received).")
