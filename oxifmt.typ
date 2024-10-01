@@ -8,8 +8,9 @@
 
 #let using-080 = type(type(5)) != _str-type
 #let using-090 = using-080 and str(-1).codepoints().first() == "\u{2212}"
+#let using-0110 = using-090 and sys.version >= version(0, 11, 0)
 
-#let _arr-chunks = if using-090 {
+#let _arr-chunks = if using-0110 {
   array.chunks
 } else {
   (arr, chunks) => {
