@@ -73,6 +73,7 @@
   assert.eq(strfmt("{}", -230, fmt-thousands-separator: "_"), "-230")
   assert.eq(strfmt("{}", -2300, fmt-thousands-separator: "_"), "-2_300")
   assert.eq(strfmt("{}", -2300.453, fmt-thousands-separator: "_"), "-2_300.453")
+  assert.eq(strfmt("{}", 5555.2, fmt-thousands-separator: "€", fmt-decimal-separator: "€€"), "5€555€€2")
   assert.eq(strfmt("{:010}", -23003, fmt-thousands-separator: "abc"), "-000abc023abc003")
   assert.eq(strfmt("{:+013}", 23003.34, fmt-thousands-separator: "abc"), "+000abc023abc003.34")
   assert.eq(strfmt("{:#b}", 255, fmt-thousands-separator: "_"), "0b11_111_111")

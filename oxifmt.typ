@@ -283,13 +283,13 @@ parameter := argument '$'
         integral = str(
           bytes(
             _arr-chunks(
-              array(bytes(integral.rev())),
+              array(bytes(integral)).rev(),
               fmt-thousands-count
             )
-            .intersperse(array(bytes(fmt-thousands-separator.rev())))
-            .join()
+            .join(array(bytes(fmt-thousands-separator)).rev())
+            .rev()
           )
-        ).rev()
+        )
       }
 
       if fractional.len() > 0 {
@@ -471,13 +471,13 @@ parameter := argument '$'
       integral = str(
         bytes(
           _arr-chunks(
-            array(bytes(integral.rev())),
+            array(bytes(integral)).rev(),
             fmt-thousands-count
           )
-          .intersperse(array(bytes(fmt-thousands-separator.rev())))
-          .join()
+          .join(array(bytes(fmt-thousands-separator)).rev())
+          .rev()
         )
-      ).rev()
+      )
     }
 
     replacement = integral + replaced-fractional + exponent-suffix
