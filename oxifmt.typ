@@ -6,6 +6,11 @@
 #let _str-type = type("")
 #let _label-type = type(<hello>)
 
+#let using-080 = type(type(5)) != _str-type
+#let using-090 = using-080 and str(-1).codepoints().first() == "\u{2212}"
+
+#panic(using-090)
+
 #let _strfmt_formatparser(s) = {
   if type(s) != _str-type {
     panic("String format parsing internal error: String format parser given non-string.")
