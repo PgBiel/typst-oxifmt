@@ -9,7 +9,22 @@
 #let using-080 = type(type(5)) != _str-type
 #let using-090 = using-080 and str(-1).codepoints().first() == "\u{2212}"
 
-#panic(using-090)
+#let _arr-chunks = if using-090 {
+  array.chunks
+} else {
+  (arr, chunks) => {
+    let i = 0
+    let res = ()
+    for element in arr {
+      if calc.rem(i, chunks) == 0 {
+        res.push(())
+      }
+      res.last().push(element)
+      i += 1
+    }
+    res
+  }
+}
 
 #let _strfmt_formatparser(s) = {
   if type(s) != _str-type {
@@ -265,10 +280,12 @@ parameter := argument '$'
       if fmt-thousands-separator != "" {
         integral = str(
           bytes(
-            array(bytes(integral.rev()))
-              .chunks(fmt-thousands-count)
-              .intersperse(array(bytes(fmt-thousands-separator.rev())))
-              .join()
+            _arr-chunks(
+              array(bytes(integral.rev())),
+              fmt-thousands-count
+            )
+            .intersperse(array(bytes(fmt-thousands-separator.rev())))
+            .join()
           )
         ).rev()
       }
@@ -445,10 +462,12 @@ parameter := argument '$'
     if fmt-thousands-separator != "" {
       integral = str(
         bytes(
-          array(bytes(integral.rev()))
-            .chunks(fmt-thousands-count)
-            .intersperse(array(bytes(fmt-thousands-separator.rev())))
-            .join()
+          _arr-chunks(
+            array(bytes(integral.rev())),
+            fmt-thousands-count
+          )
+          .intersperse(array(bytes(fmt-thousands-separator.rev())))
+          .join()
         )
       ).rev()
     }
