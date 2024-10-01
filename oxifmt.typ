@@ -274,9 +274,10 @@ parameter := argument '$'
 ) = {
   if extras == none {
     let is-numeric = _strfmt_is-numeric-type(replacement)
-    let string-replacement = _strfmt_stringify(replacement)
 
     if is-numeric {
+      let string-replacement = _strfmt_stringify(calc.abs(replacement))
+      let sign = if replacement < 0 { "-" } else { "" }
       let (integral, ..fractional) = string-replacement.split(".")
       if fmt-thousands-separator != "" {
         integral = str(
@@ -293,12 +294,12 @@ parameter := argument '$'
 
       if fractional.len() > 0 {
         let decimal-separator = if fmt-decimal-separator not in (auto, none) { _strfmt_stringify(fmt-decimal-separator) } else { "." }
-        return integral + decimal-separator + fractional.first()
+        return sign + integral + decimal-separator + fractional.first()
       } else {
-        return integral
+        return sign + integral
       }
     } else {
-      return string-replacement
+      return _strfmt_stringify(replacement)
     }
   }
   let extras = _strfmt_stringify(extras)
