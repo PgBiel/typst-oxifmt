@@ -4,9 +4,9 @@ name: Tests CI
 on:
   # Triggers the workflow on push or pull request events but only for the branches below
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
   # Allows one to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -20,9 +20,9 @@ jobs:
     strategy:
       matrix:
         # Test for the following Typst versions
-        # 0.4.0 (earliest supported), 0.6.0 (first version with package management),
+        # 0.8.0 (earliest supported), 0.9.0 (first version with version checks),
         # 0.11.0 (latest supported)
-        typst-version: [v0.4.0, v0.6.0, v0.11.0]
+        typst-version: [v0.8.0, v0.9.0, v0.11.0]
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -35,10 +35,5 @@ jobs:
         with:
           typst-version: ${{ matrix.typst-version }}
 
-      - name: 🛠️ Compile test document (<v0.7.0)
-        if: ${{ matrix.typst-version != 'v0.11.0' }}
-        run: "typst --root . compile tests/strfmt-tests.typ"
-
-      - name: 🛠️ Compile test document (v0.7.0+)
-        if: ${{ matrix.typst-version == 'v0.11.0' }}
+      - name: 🛠️ Compile test document
         run: "typst compile tests/strfmt-tests.typ --root ."
