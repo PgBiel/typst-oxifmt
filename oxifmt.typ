@@ -459,7 +459,7 @@ parameter := argument '$'
     let exponent-suffix = exponent-suffix.replace(".", decimal-separator)
 
     if zero {
-      let width-diff = width - (integral.len() + replaced-fractional.len() + sign.len() + hashtag-prefix.len() + exponent-suffix.len())
+      let width-diff = width - (integral.len() + replaced-fractional.codepoints().len() + sign.len() + hashtag-prefix.len() + exponent-suffix.codepoints().len())
       if width-diff > 0 {  // prefix with the appropriate amount of zeroes
         integral = ("0" * width-diff) + integral
       }
@@ -506,7 +506,7 @@ parameter := argument '$'
 
   if fill != none {
     // perform fill/width adjustments: "x" ---> "  x" if width is 4
-    let width-diff = width - replacement.len()  // number prefixes are also considered for width
+    let width-diff = width - replacement.codepoints().len()  // number prefixes are also considered for width
     if width-diff > 0 {
       if align == left {
         replacement = replacement + (fill * width-diff)
