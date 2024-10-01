@@ -27,6 +27,18 @@
   }
 }
 
+#let _float-is-nan = if using-0110 {
+  float.is-nan
+} else {
+  x => type(x) == _float-type and "NaN" in repr(x)
+}
+
+#let _float-is-infinite = if using-0110 {
+  float.is-infinite
+} else {
+  x => type(x) == _float-type and "inf" in repr(x)
+}
+
 #let _strfmt_formatparser(s) = {
   if type(s) != _str-type {
     panic("String format parsing internal error: String format parser given non-string.")
@@ -216,7 +228,7 @@
 }
 
 #let _strfmt_with-precision(num, precision) = {
-  if precision == none {
+  if precision == none or type(num) == _float-type and (_float-is-nan(num) or _float-is-infinite(num)) {
     return _strfmt_stringify(num)
   }
   let result = _strfmt_stringify(calc.round(float(num), digits: calc.min(50, precision)))
@@ -274,12 +286,13 @@ parameter := argument '$'
 ) = {
   if extras == none {
     let is-numeric = _strfmt_is-numeric-type(replacement)
+    let is-nan = type(replacement) == _float-type and _float-is-nan(replacement)
 
     if is-numeric {
       let string-replacement = _strfmt_stringify(calc.abs(replacement))
-      let sign = if replacement < 0 { "-" } else { "" }
+      let sign = if not is-nan and replacement < 0 { "-" } else { "" }
       let (integral, ..fractional) = string-replacement.split(".")
-      if fmt-thousands-separator != "" {
+      if fmt-thousands-separator != "" and (type(replacement) != _float-type or not _float-is-nan(replacement) and not _float-is-infinite(replacement)) {
         integral = str(
           bytes(
             _arr-chunks(
@@ -392,6 +405,7 @@ parameter := argument '$'
 
   let is-numeric = _strfmt_is-numeric-type(replacement)
   if is-numeric {
+    let is-nan = type(replacement) == _float-type and _float-is-nan(replacement)
     if zero {
       // disable fill, we will be prefixing with zeroes if necessary
       fill = none
@@ -405,9 +419,9 @@ parameter := argument '$'
     }
 
     // if + is specified, + will appear before all numbers >= 0.
-    if sign == "+" and replacement >= 0 {
+    if sign == "+" and not is-nan and replacement >= 0 {
       sign = "+"
-    } else if replacement < 0 {
+    } else if not is-nan and replacement < 0 {
       sign = "-"
     } else {
       sign = ""
@@ -467,7 +481,7 @@ parameter := argument '$'
     }
 
     // Format with thousands AFTER zeroes, but BEFORE applying textual prefixes
-    if fmt-thousands-separator != "" {
+    if fmt-thousands-separator != "" and (type(replacement) != _float-type or not _float-is-nan(replacement) and not _float-is-infinite(replacement)) {
       integral = str(
         bytes(
           _arr-chunks(
