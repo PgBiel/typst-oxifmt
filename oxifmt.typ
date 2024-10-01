@@ -441,7 +441,13 @@ parameter := argument '$'
     } else {
       precision = none
       let new-replacement = if spectype.ends-with("?") {
-        repr(replacement)
+        let repr-res = repr(replacement)
+        if using-090 and not using-0110 and type(replacement) == _float-type and "." not in repr-res {
+          // Workaround for repr inconsistency in Typst 0.9.0 and 0.10.0
+          repr-res + ".0"
+        } else {
+          repr-res
+        }
       } else {
         _strfmt_stringify(replacement)
       }
