@@ -83,7 +83,7 @@
   assert.eq(strfmt("{:e}", 5555.2, fmt-thousands-separator: "_", fmt-decimal-separator: "heap"), "5heap5552e3")
   assert.eq(strfmt("{:010}", 5555.2, fmt-thousands-separator: "_", fmt-decimal-separator: "€"), "00_005_555€2")
   assert.eq(strfmt("{:€>10}", 5555.2, fmt-thousands-separator: "_", fmt-decimal-separator: "€"), "€€€5_555€2")
-  assert.eq(strfmt("{:€>10}", 5555.2, fmt-thousands-separator: "€", fmt-decimal-separator: "€"), "€€€5€555€2")
+  assert.eq(strfmt("{:€>10}", 5555.2, fmt-thousands-separator: "€a", fmt-decimal-separator: "€"), "€€5€a555€2")
 
   // Test count
   assert.eq(strfmt("{}", 10, fmt-thousands-count: 3, fmt-thousands-separator: "_"), "10")
