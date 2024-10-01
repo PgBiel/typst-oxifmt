@@ -234,4 +234,4 @@ The tests succeeded if you received no error messages from the last command (ple
 
 ## License
 
-MIT-0 license (see the `LICENSE` file).
+Licensed under MIT or Apache-2.0, at your option.
