@@ -61,6 +61,15 @@
   assert.eq(strfmt("{:€>15}", "Ĺo͂řȩ5.5m̅"), "€€€€€Ĺo͂řȩ5.5m̅")
   assert.eq(strfmt("{:€>10}", "abc€d"), "€€€€€abc€d")
 }
+// Float edge cases
+#{
+  assert.eq(strfmt("{}", float("nan")), "NaN")
+  assert.eq(strfmt("{:05.10}", float("nan")), "00NaN")
+  assert.eq(strfmt("{:05e}", float("nan")), "00NaN")
+  assert.eq(strfmt("{:05e}", float("inf")), "00inf")
+  assert.eq(strfmt("{:+05e}", float("inf")), "+0inf")
+  assert.eq(strfmt("{:05e}", -float("inf")), "-0inf")
+}
 // Issue #5: Thousands
 #{
   // Test separator
@@ -91,11 +100,15 @@
   assert.eq(strfmt("{}", 1000, fmt-thousands-count: 2, fmt-thousands-separator: "_"), "10_00")
   assert.eq(strfmt("{}", 10000000.3231, fmt-thousands-count: 2, fmt-thousands-separator: "_"), "10_00_00_00.3231")
   assert.eq(strfmt("{}", float("nan"), fmt-thousands-count: 2, fmt-thousands-separator: "_"), "NaN")
+  assert.eq(strfmt("{}", float("inf"), fmt-thousands-count: 2, fmt-thousands-separator: "_"), "inf")
+  assert.eq(strfmt("{}", -float("inf"), fmt-thousands-count: 2, fmt-thousands-separator: "_"), "-inf")
   assert.eq(strfmt("{:010}", -23003, fmt-thousands-count: 4, fmt-thousands-separator: "|"), "-0|0002|3003")
   assert.eq(strfmt("{:#b}", 255, fmt-thousands-count: 1, fmt-thousands-separator: "_"), "0b1_1_1_1_1_1_1_1")
   assert.eq(strfmt("{:#x}", -16 * 16 * 16 * 16 * 15, fmt-thousands-count: 2, fmt-thousands-separator: "_"), "-0xf_00_00")
   assert.eq(strfmt("{:o}", -16 * 16 * 16 * 16 * 15, fmt-thousands-count: 4, fmt-thousands-separator: "_"), "-360_0000")
   assert.eq(strfmt("{:05}", float("nan"), fmt-thousands-count: 2, fmt-thousands-separator: "_"), "00NaN")
+  assert.eq(strfmt("{:05}", float("inf"), fmt-thousands-count: 2, fmt-thousands-separator: "_"), "00inf")
+  assert.eq(strfmt("{:05}", -float("inf"), fmt-thousands-count: 2, fmt-thousands-separator: "_"), "-0inf")
 }
 // DOC TESTS
 #{

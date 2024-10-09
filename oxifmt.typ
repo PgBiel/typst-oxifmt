@@ -229,7 +229,7 @@
 }
 
 #let _strfmt_with-precision(num, precision) = {
-  if precision == none or type(num) == _float-type and (_float-is-nan(num) or _float-is-infinite(num)) {
+  if precision == none {
     return _strfmt_stringify(num)
   }
   let result = _strfmt_stringify(calc.round(float(num), digits: calc.min(50, precision)))
@@ -290,10 +290,11 @@ parameter := argument '$'
 
     if is-numeric {
       let is-nan = type(replacement) == _float-type and _float-is-nan(replacement)
+      let is-inf = type(replacement) == _float-type and _float-is-infinite(replacement)
       let string-replacement = _strfmt_stringify(calc.abs(replacement))
       let sign = if not is-nan and replacement < 0 { "-" } else { "" }
       let (integral, ..fractional) = string-replacement.split(".")
-      if fmt-thousands-separator != "" and (type(replacement) != _float-type or not _float-is-nan(replacement) and not _float-is-infinite(replacement)) {
+      if fmt-thousands-separator != "" and not is-nan and not is-inf {
         integral = _arr-chunks(integral.codepoints().rev(), fmt-thousands-count)
           .join(fmt-thousands-separator.codepoints().rev())
           .rev()
@@ -401,6 +402,7 @@ parameter := argument '$'
   let is-numeric = _strfmt_is-numeric-type(replacement)
   if is-numeric {
     let is-nan = type(replacement) == _float-type and _float-is-nan(replacement)
+    let is-inf = type(replacement) == _float-type and _float-is-infinite(replacement)
     if zero {
       // disable fill, we will be prefixing with zeroes if necessary
       fill = none
@@ -431,12 +433,12 @@ parameter := argument '$'
     let fractional = ()
     let exponent-suffix = ""
 
-    if spectype in ("e", "E") {
+    if spectype in ("e", "E") and not is-nan and not is-inf {
       let exponent-sign = if spectype == "E" { "E" } else { "e" }
       let (mantissa, exponent) = _strfmt_exp-format(calc.abs(replacement), exponent-sign: exponent-sign, precision: precision)
       (integral, ..fractional) = mantissa.split(".")
       exponent-suffix = exponent
-    } else if type(replacement) != _int-type and precision != none {
+    } else if type(replacement) != _int-type and precision != none and not is-nan and not is-inf {
       let new-replacement = _strfmt_with-precision(replacement, precision)
       (integral, ..fractional) = new-replacement.split(".")
     } else if type(replacement) == _int-type and spectype in ("x", "X", "b", "o", "x?", "X?") {
@@ -476,7 +478,7 @@ parameter := argument '$'
     }
 
     // Format with thousands AFTER zeroes, but BEFORE applying textual prefixes
-    if fmt-thousands-separator != "" and (type(replacement) != _float-type or not _float-is-nan(replacement) and not _float-is-infinite(replacement)) {
+    if fmt-thousands-separator != "" and not is-nan and not is-inf {
       integral = _arr-chunks(integral.codepoints().rev(), fmt-thousands-count)
         .join(fmt-thousands-separator.codepoints().rev())
         .rev()
