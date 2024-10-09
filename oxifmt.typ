@@ -287,9 +287,9 @@ parameter := argument '$'
 ) = {
   if extras == none {
     let is-numeric = _strfmt_is-numeric-type(replacement)
-    let is-nan = type(replacement) == _float-type and _float-is-nan(replacement)
 
     if is-numeric {
+      let is-nan = type(replacement) == _float-type and _float-is-nan(replacement)
       let string-replacement = _strfmt_stringify(calc.abs(replacement))
       let sign = if not is-nan and replacement < 0 { "-" } else { "" }
       let (integral, ..fractional) = string-replacement.split(".")
