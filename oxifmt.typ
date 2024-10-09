@@ -293,16 +293,10 @@ parameter := argument '$'
       let sign = if not is-nan and replacement < 0 { "-" } else { "" }
       let (integral, ..fractional) = string-replacement.split(".")
       if fmt-thousands-separator != "" and (type(replacement) != _float-type or not _float-is-nan(replacement) and not _float-is-infinite(replacement)) {
-        integral = str(
-          bytes(
-            _arr-chunks(
-              array(bytes(integral)).rev(),
-              fmt-thousands-count
-            )
-            .join(array(bytes(fmt-thousands-separator)).rev())
-            .rev()
-          )
-        )
+        integral = _arr-chunks(integral.codepoints().rev(), fmt-thousands-count)
+          .join(fmt-thousands-separator.codepoints().rev())
+          .rev()
+          .join()
       }
 
       if fractional.len() > 0 {
@@ -482,16 +476,10 @@ parameter := argument '$'
 
     // Format with thousands AFTER zeroes, but BEFORE applying textual prefixes
     if fmt-thousands-separator != "" and (type(replacement) != _float-type or not _float-is-nan(replacement) and not _float-is-infinite(replacement)) {
-      integral = str(
-        bytes(
-          _arr-chunks(
-            array(bytes(integral)).rev(),
-            fmt-thousands-count
-          )
-          .join(array(bytes(fmt-thousands-separator)).rev())
-          .rev()
-        )
-      )
+      integral = _arr-chunks(integral.codepoints().rev(), fmt-thousands-count)
+        .join(fmt-thousands-separator.codepoints().rev())
+        .rev()
+        .join()
     }
 
     replacement = integral + replaced-fractional + exponent-suffix
