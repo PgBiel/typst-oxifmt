@@ -17,11 +17,12 @@
     let i = 0
     let res = ()
     for element in arr {
-      if calc.rem(i, chunks) == 0 {
+      if i == 0 {
         res.push(())
+        i = chunks
       }
       res.last().push(element)
-      i += 1
+      i -= 1
     }
     res
   }
