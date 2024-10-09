@@ -9,6 +9,9 @@
 #let using-080 = type(type(5)) != _str-type
 #let using-090 = using-080 and str(-1).codepoints().first() == "\u{2212}"
 #let using-0110 = using-090 and sys.version >= version(0, 11, 0)
+#let using-0120 = using-090 and sys.version >= version(0, 12, 0)
+
+#let _decimal = if using-0120 { decimal } else { none }
 
 #let _arr-chunks = if using-0110 {
   array.chunks
@@ -185,7 +188,7 @@
 }
 
 #let _strfmt_is-numeric-type(obj) = {
-  type(obj) in (_int-type, _float-type)
+  type(obj) in (_int-type, _float-type, _decimal)
 }
 
 #let _strfmt_stringify(obj) = {
@@ -200,7 +203,7 @@
     }
   } else if type(obj) == _int-type {
     str(obj).replace("\u{2212}", "-")
-  } else if type(obj) in (_label-type, _str-type) {
+  } else if type(obj) in (_label-type, _str-type, _decimal) {
     str(obj)
   } else {
     repr(obj)
@@ -237,7 +240,7 @@
   if precision == none {
     return _strfmt_stringify(num)
   }
-  let result = _strfmt_stringify(calc.round(float(num), digits: calc.min(50, precision)))
+  let result = _strfmt_stringify(calc.round(if type(num) == _decimal { num } else { float(num) }, digits: calc.min(50, precision)))
   let digits-match = result.match(regex("^\\d+\\.(\\d+)$"))
   let digits-len-diff = 0
   if digits-match != none and digits-match.captures.len() > 0 {
@@ -260,10 +263,20 @@
   result
 }
 
-#let _strfmt_exp-format(num, exponent-sign: "e", base: 10, precision: none) = {
+#let _strfmt_exp-format(num, exponent-sign: "e", precision: none) = {
   assert(_strfmt_is-numeric-type(num), message: "String formatter internal error: Cannot convert '" + repr(num) + "' to a number to obtain its scientific notation representation.")
+
+  if type(num) == _decimal {
+    // TODO: 0.000X support
+    let (integral, ..fractional) = str(num).split(".")
+    let fractional = fractional.join()
+    let total-digits = integral.len() + fractional.len()
+    let mantissa = integral.codepoints().first() + "." + integral.slice(1) + fractional
+    return (mantissa, exponent-sign + _strfmt_stringify(total-digits - 1))
+  }
+
   let f = float(num)
-  let exponent = if f == 0 { 1 } else { calc.floor(calc.log(calc.abs(f), base: base)) }
+  let exponent = if f == 0 { 1 } else { calc.floor(calc.log(calc.abs(f), base: 10)) }
   let mantissa = f / calc.pow(10, exponent)
   let mantissa = _strfmt_with-precision(mantissa, precision)
 
@@ -404,8 +417,7 @@ parameter := argument '$'
     spec-error()
   }
 
-  let is-numeric = _strfmt_is-numeric-type(replacement)
-  if is-numeric {
+  if _strfmt_is-numeric-type(replacement) {
     let is-nan = type(replacement) == _float-type and _float-is-nan(replacement)
     let is-inf = type(replacement) == _float-type and _float-is-infinite(replacement)
     if zero {

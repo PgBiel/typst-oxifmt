@@ -1,4 +1,4 @@
-#import "../oxifmt.typ": strfmt
+#import "../oxifmt.typ": strfmt, using-0120
 
 #{
   // test basics (sequential args, named args, pos args)
@@ -109,6 +109,18 @@
   assert.eq(strfmt("{:05}", float("nan"), fmt-thousands-count: 2, fmt-thousands-separator: "_"), "00NaN")
   assert.eq(strfmt("{:05}", float("inf"), fmt-thousands-count: 2, fmt-thousands-separator: "_"), "00inf")
   assert.eq(strfmt("{:05}", -float("inf"), fmt-thousands-count: 2, fmt-thousands-separator: "_"), "-0inf")
+}
+// Issue #11: Decimals
+#if using-0120 {
+  assert.eq(strfmt("{}", decimal("1223.4350320000")), "1223.4350320000")
+  assert.eq(strfmt("{}", decimal("1223.435032")), "1223.435032")
+  assert.eq(strfmt("{}", decimal("-1223.435032")), "-1223.435032")
+  assert.eq(strfmt("{}", decimal("-1223.435032"), fmt-thousands-separator: "_"), "-1_223.435032")
+  assert.eq(strfmt("{:+09}", decimal("1234.5")), "+001234.5")
+  assert.eq(strfmt("{:+09}", decimal("1234.5"), fmt-thousands-separator: "_"), "+001_234.5")
+  assert.eq(strfmt("{:011e}", -decimal("1234.5")), "-001.2345e4")
+  assert.eq(strfmt("{:011e}", -decimal("1234.50000")), "-001.2345e4")
+  assert.eq(strfmt("{:011.5}", decimal("1234.5")), "01234.50000")
 }
 // DOC TESTS
 #{
