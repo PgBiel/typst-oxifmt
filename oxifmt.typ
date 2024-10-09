@@ -189,9 +189,16 @@
 }
 
 #let _strfmt_stringify(obj) = {
-  if type(obj) in (_int-type, _float-type) {
-    // Fix negative sign not being a hyphen
-    // for consistency with our rich formatting output
+  if type(obj) == _float-type {
+    if _float-is-infinite(obj) {
+      // Fix 0.12.0 inf string inconsistency
+      if obj < 0 { "-" } else { "" } + "inf"
+    } else {
+      // Fix negative sign not being a hyphen
+      // for consistency with our rich formatting output
+      str(obj).replace("\u{2212}", "-")
+    }
+  } else if type(obj) == _int-type {
     str(obj).replace("\u{2212}", "-")
   } else if type(obj) in (_label-type, _str-type) {
     str(obj)
