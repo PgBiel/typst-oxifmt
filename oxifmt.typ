@@ -171,19 +171,17 @@
 #let _strfmt_parse-fmt-name(name) = {
   // {a:b} => separate 'a' from 'b'
   // (also accepts {a}, {}, {0}, {:...})
-  let subparts = name.match(regex("^([^:]*)(?::(.*))?$")).captures
-  let name = subparts.at(0)
-  let extras = subparts.at(1)
+  let (name, ..extras) = name.split(":")
   let name = if type(name) != _str-type {
     name
   } else if name == "" {
     none
-  } else if regex("^\\d+$") in name {
+  } else if name.codepoints().all(x => x == "0" or x == "1" or x == "2" or x == "3" or x == "4" or x == "5" or x == "6" or x == "7" or x == "8" or x == "9") {
     int(name)
   } else {
     name
   }
-  (name, extras)
+  (name, extras.join())
 }
 
 #let _strfmt_is-numeric-type(obj) = {
