@@ -267,12 +267,48 @@
   assert(_strfmt_is-numeric-type(num), message: "String formatter internal error: Cannot convert '" + repr(num) + "' to a number to obtain its scientific notation representation.")
 
   if type(num) == _decimal {
-    // TODO: 0.000X support
+    // Normalize signed zero
+    let num = if num == 0 { _decimal("0") } else { num }
     let (integral, ..fractional) = str(num).split(".")
-    let fractional = fractional.join()
-    let total-digits = integral.len() + fractional.len()
-    let mantissa = integral.codepoints().first() + "." + integral.slice(1) + fractional
-    return (mantissa, exponent-sign + _strfmt_stringify(total-digits - 1))
+    // Normalize decimals with larger scales than is needed
+    let fractional = fractional.sum(default: "").trim("0", at: end)
+    let (integral, fractional, exponent) = if num > -1 and num < 1 and fractional != "" {
+      let first-non-zero = fractional.position("1")
+      if first-non-zero == none { first-non-zero = fractional.position("2") }
+      if first-non-zero == none { first-non-zero = fractional.position("3") }
+      if first-non-zero == none { first-non-zero = fractional.position("4") }
+      if first-non-zero == none { first-non-zero = fractional.position("5") }
+      if first-non-zero == none { first-non-zero = fractional.position("6") }
+      if first-non-zero == none { first-non-zero = fractional.position("7") }
+      if first-non-zero == none { first-non-zero = fractional.position("8") }
+      if first-non-zero == none { first-non-zero = fractional.position("9") }
+      assert(first-non-zero != none, message: "String formatter internal error: expected non-zero fractional digit")
+
+      // Integral part is zero
+      // Convert 0.00012345 -> 1.2345
+      // Position of first non-zero is the amount of zeroes - 1
+      // (e.g. above, position of 1 is 3 => 3 zeroes,
+      // so exponent is -3 - 1 = -4)
+      (
+        fractional.at(first-non-zero),
+        fractional.slice(first-non-zero + 1),
+        -first-non-zero - 1
+      )
+    } else {
+      // Number has non-zero integral part, or is zero
+      // Convert 12345.6789 -> 1.23456789
+      // Exponent is integral digits - 1
+      (
+        integral.at(0),
+        integral.slice(1) + fractional,
+        integral.len() - 1
+      )
+    }
+    return (
+      // mantissa
+      integral + if fractional != "" { "." + fractional } else { "" },
+      exponent-sign + _strfmt_stringify(exponent)
+    )
   }
 
   let f = float(num)

@@ -118,8 +118,11 @@
   assert.eq(strfmt("{}", decimal("-1223.435032"), fmt-thousands-separator: "_"), "-1_223.435032")
   assert.eq(strfmt("{:+09}", decimal("1234.5")), "+001234.5")
   assert.eq(strfmt("{:+09}", decimal("1234.5"), fmt-thousands-separator: "_"), "+001_234.5")
-  assert.eq(strfmt("{:011e}", -decimal("1234.5")), "-001.2345e4")
-  assert.eq(strfmt("{:011e}", -decimal("1234.50000")), "-001.2345e4")
+  assert.eq(strfmt("{:011e}", -decimal("1234.5")), "-001.2345e3")
+  assert.eq(strfmt("{:011e}", -decimal("1234.50000")), "-001.2345e3")
+  assert.eq(strfmt("{:011e}", -decimal("0.00012345")), "-01.2345e-4")
+  assert.eq(strfmt("{:e}", -decimal("0")), "0e0")
+  assert.eq(strfmt("{:e}", decimal("132423")), "1.32423e5")
   assert.eq(strfmt("{:011.5}", decimal("1234.5")), "01234.50000")
 }
 // DOC TESTS
