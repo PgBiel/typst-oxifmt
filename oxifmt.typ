@@ -348,7 +348,7 @@ parameter := argument '$'
       let arg = pos-replacements.at(i)
       assert(
         type(arg) == _int-type,
-        message: "String formatter error: Attempted to use positional argument " + str(i) + " for " + spec-part-name + ", but it was a(n) '" + type(arg) + "', not an integer (from '{" + fullname.replace("{", "{{").replace("}", "}}") + "}')."
+        message: "String formatter error: Attempted to use positional argument " + str(i) + " for " + spec-part-name + ", but it was a(n) '" + str(type(arg)) + "', not an integer (from '{" + fullname.replace("{", "{{").replace("}", "}}") + "}')."
       )
 
       int(arg)
@@ -364,7 +364,7 @@ parameter := argument '$'
       let arg = named-replacements.at(named)
       assert(
         type(arg) == _int-type,
-        message: "String formatter error: Attempted to use named argument '" + named + "' for " + spec-part-name + ", but it was a(n) '" + type(arg) + "', not an integer (from '{" + fullname.replace("{", "{{").replace("}", "}}") + "}')."
+        message: "String formatter error: Attempted to use named argument '" + named + "' for " + spec-part-name + ", but it was a(n) '" + str(type(arg)) + "', not an integer (from '{" + fullname.replace("{", "{{").replace("}", "}}") + "}')."
       )
 
       int(arg)
@@ -545,7 +545,7 @@ parameter := argument '$'
 
   assert(
     type(fmt-thousands-count) == _int-type,
-    message: "String formatter error: 'fmt-thousands-count' must be an integer, got '" + type(fmt-thousands-count) + "' instead."
+    message: "String formatter error: 'fmt-thousands-count' must be an integer, got '" + str(type(fmt-thousands-count)) + "' instead."
   )
   assert(
     fmt-thousands-count > 0,
@@ -553,7 +553,7 @@ parameter := argument '$'
   )
   assert(
     type(fmt-thousands-separator) == _str-type,
-    message: "String formatter error: 'fmt-thousands-separator' must be a string (or empty string, \"\", to disable), got '" + type(fmt-thousands-separator) + "' instead."
+    message: "String formatter error: 'fmt-thousands-separator' must be a string (or empty string, \"\", to disable), got '" + str(type(fmt-thousands-separator)) + "' instead."
   )
 
   let parts = ()
