@@ -6,8 +6,9 @@
 #let _str-type = type("")
 #let _label-type = type(<hello>)
 
+#let _minus-sign = "\u{2212}"
 #let using-080 = type(type(5)) != _str-type
-#let using-090 = using-080 and str(-1).codepoints().first() == "\u{2212}"
+#let using-090 = using-080 and str(-1).codepoints().first() == _minus-sign
 #let using-0110 = using-090 and sys.version >= version(0, 11, 0)
 #let using-0120 = using-090 and sys.version >= version(0, 12, 0)
 
@@ -215,6 +216,8 @@
   if type(radix) != _int-type or num == 0 or radix <= 1 {
     return "0"
   }
+
+  // Note: only integers are accepted here, so no need to check for decimal signed zero
   let sign = if num < 0 and signed { "-" } else { "" }
   let num = calc.abs(num)
   let radix = calc.min(radix, 16)
@@ -346,7 +349,17 @@ parameter := argument '$'
       let is-nan = type(replacement) == _float-type and _float-is-nan(replacement)
       let is-inf = type(replacement) == _float-type and _float-is-infinite(replacement)
       let string-replacement = _strfmt_stringify(calc.abs(replacement))
-      let sign = if not is-nan and replacement < 0 { "-" } else { "" }
+      let sign = if (
+        not is-nan and replacement < 0
+        or replacement == 0 and type(replacement) == _decimal and (
+          // Preserve signed zero decimal
+          "-" in str(replacement) or _minus-sign in str(replacement)
+        )
+      ) {
+        "-"
+      } else {
+        ""
+      }
       let (integral, ..fractional) = string-replacement.split(".")
       if fmt-thousands-separator != "" and not is-nan and not is-inf {
         integral = _arr-chunks(integral.codepoints().rev(), fmt-thousands-count)
@@ -468,8 +481,17 @@ parameter := argument '$'
       align = right
     }
 
-    // if + is specified, + will appear before all numbers >= 0.
-    if sign == "+" and not is-nan and replacement >= 0 {
+    if replacement == 0 and type(replacement) == _decimal {
+      // Preserve signed zero.
+      if "-" in str(replacement) or _minus-sign in str(replacement) {
+        sign = "-"
+      } else if sign == "+" {
+        sign = "+"
+      } else {
+        sign = ""
+      }
+    } else if sign == "+" and not is-nan and replacement >= 0 {
+      // if + is specified, + will appear before all numbers >= 0.
       sign = "+"
     } else if not is-nan and replacement < 0 {
       sign = "-"
