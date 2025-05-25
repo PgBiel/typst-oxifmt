@@ -4,7 +4,7 @@ A Typst library that brings convenient string formatting and interpolation throu
 
 A few extras (beyond the Rust-like syntax) will be added over time, though (feel free to drop suggestions at the repository: https://github.com/PgBiel/typst-oxifmt). The first "extra" so far is the `fmt-decimal-separator: "string"` parameter, which lets you customize the decimal separator for decimal numbers (floats) inserted into strings. E.g. `strfmt("Result: {}", 5.8, fmt-decimal-separator: ",")` will return the string `"Result: 5,8"` (comma instead of dot). We also provide thousands separator support with `fmt-thousands-separator: "_"` for example. See more at ["Custom formatting options"](#custom-formatting-options).
 
-**Compatible with:** [Typst](https://github.com/typst/typst) v0.4.0+
+**Compatible with:** [Typst](https://github.com/typst/typst) v0.7.0+
 
 ## Quick examples
 
