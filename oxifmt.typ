@@ -616,22 +616,33 @@ parameter := argument '$'
   let named-replacements = replacements.named()
   let unnamed-format-index = 0
 
-  assert(
-    fmt-decimal-separator == auto or type(fmt-decimal-separator) == str,
-    message: "String formatter error: 'fmt-decimal-separator' must be a string, got '" + str(type(fmt-decimal-separator)) + "' instead."
-  )
-  assert(
-    type(fmt-thousands-count) == _int-type,
-    message: "String formatter error: 'fmt-thousands-count' must be an integer, got '" + str(type(fmt-thousands-count)) + "' instead."
-  )
-  assert(
-    fmt-thousands-count > 0,
-    message: "String formatter error: 'fmt-thousands-count' must be a positive integer, got " + str(fmt-thousands-count) + " instead."
-  )
-  assert(
-    type(fmt-thousands-separator) == _str-type,
-    message: "String formatter error: 'fmt-thousands-separator' must be a string (or empty string, \"\", to disable), got '" + str(type(fmt-thousands-separator)) + "' instead."
-  )
+  if fmt-decimal-separator != auto and type(fmt-decimal-separator) != str {
+    assert(
+      false,
+      message: "String formatter error: 'fmt-decimal-separator' must be a string or 'auto', got '" + str(type(fmt-decimal-separator)) + "' instead."
+    )
+  }
+
+  if type(fmt-thousands-count) != _int-type {
+    assert(
+      false,
+      message: "String formatter error: 'fmt-thousands-count' must be an integer, got '" + str(type(fmt-thousands-count)) + "' instead."
+    )
+  }
+
+  if fmt-thousands-count <= 0 {
+    assert(
+      false,
+      message: "String formatter error: 'fmt-thousands-count' must be a positive integer, got " + str(fmt-thousands-count) + " instead."
+    )
+  }
+
+  if type(fmt-thousands-separator) != _str-type {
+    assert(
+      false,
+      message: "String formatter error: 'fmt-thousands-separator' must be a string (or empty string, \"\", to disable), got '" + str(type(fmt-thousands-separator)) + "' instead."
+    )
+  }
 
   for (name, _) in named-replacements {
     if name.starts-with("fmt-") {
