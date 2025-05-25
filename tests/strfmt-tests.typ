@@ -140,7 +140,9 @@
 #{
   assert.eq(strfmt("{0:e}",10000000000000000000.0), "1e19")
   assert.eq(strfmt("{0:e}",10000000000000000000), "1e19")
-  assert.eq(strfmt("{0:e}",float.inf), "inf")
+  assert.eq(strfmt("{0:e}",float("inf")), "inf")
+  assert.eq(strfmt("{0:e}",float("-inf")), "-inf")
+  assert.eq(strfmt("{0:e}",float("nan")), "NaN")
   assert.eq(strfmt("{0:e}",1e50), "1e50")
   assert.eq(strfmt("{0:e}",1e-50), "1.0000000000000002e-50")
   assert.eq(strfmt("{0:.0e}",1e-50), "1e-50")
