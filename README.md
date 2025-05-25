@@ -2,7 +2,7 @@
 
 A Typst library that brings convenient string formatting and interpolation through the `strfmt` function. Its syntax is taken directly from Rust's `format!` syntax, so feel free to read its page for more information (https://doc.rust-lang.org/std/fmt/); however, this README should have enough information and examples for all expected uses of the library. Only a few things aren't supported from the Rust syntax, such as the `p` (pointer) format type, or the `.*` precision specifier. Check out the ["Examples" section](#examples) for more.
 
-A few extras (beyond the Rust-like syntax) will be added over time, though (feel free to drop suggestions at the repository: https://github.com/PgBiel/typst-oxifmt). The first "extra" so far is the `fmt-decimal-separator: "string"` parameter, which lets you customize the decimal separator for decimal numbers (floats) inserted into strings. E.g. `strfmt("Result: {}", 5.8, fmt-decimal-separator: ",")` will return the string `"Result: 5,8"` (comma instead of dot). We also provide thousands separator support with `fmt-thousands-separator: "_"` for example. See more at ["Custom formatting options"](#custom-formatting-options).
+A few extras (beyond the Rust-like syntax) will be added over time, though (feel free to drop suggestions at the repository: https://github.com/PgBiel/typst-oxifmt). The first "extra" so far is the `fmt-decimal-separator: "string"` parameter, which lets you customize the decimal separator for decimal numbers (floats) inserted into strings. E.g. `strfmt("Result: {}", 5.8, fmt-decimal-separator: ",")` will return the string `"Result: 5,8"` (comma instead of dot). We also provide thousands separator support with `fmt-thousands-separator: "_"` for example. See more at ["Custom options"](#custom-options).
 
 **Compatible with:** [Typst](https://github.com/typst/typst) v0.7.0+
 
@@ -37,7 +37,7 @@ A few extras (beyond the Rust-like syntax) will be added over time, though (feel
 - [Usage](#usage)
     - [Formatting options](#formatting-options)
     - [Examples](#examples)
-    - [Custom formatting options](#custom-formatting-options)
+    - [Custom options](#custom-options)
     - [Grammar](#grammar)
 - [Issues and Contributing](#issues-and-contributing)
 - [Testing](#testing)
@@ -199,7 +199,7 @@ Some examples:
 #assert.eq(s, "1.242312e2 1.242312E2 +1.242312000e2 | 5e1 | -2.0000E-2")
 ```
 
-### Custom oxifmt options
+### Custom options
 
 Oxifmt has some additional formatting options laid on top of Rust's, listed below with examples:
 
