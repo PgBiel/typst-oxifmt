@@ -205,8 +205,17 @@
     let s = strfmt("{0:e} {0:E} {0:+.9e} | {1:e} | {2:.4E}", 124.2312, 50, -0.02)
     assert.eq(s, "1.242312e2 1.242312E2 +1.242312000e2 | 5e1 | -2.0000E-2")
   }
+  // Custom options
   {
     let s = strfmt("{0} {0:.6} {0:.5e}", 1.432, fmt-decimal-separator: ",")
     assert.eq(s, "1,432 1,432000 1,43200e0")
+  }
+  {
+    let s = strfmt("{}", 20000, fmt-thousands-separator: "_")
+    assert.eq(s, "20_000")
+  }
+  {
+    let s = strfmt("{}", 20000, fmt-thousands-count: 2, fmt-thousands-separator: "_")
+    assert.eq(s, "2_00_00")
   }
 }
