@@ -266,14 +266,16 @@ The tests succeeded if you received no error messages from the last command (ple
 
 ### v0.3.0
 
-- **Breaking change:** Named replacements prefixed with `fmt-` are now an error. Those are reserved for future `oxifmt` options.
+- **Breaking change:** Named replacements prefixed with `fmt-` are now an error. Those are reserved for future `oxifmt` options. ([Issue #15](https://github.com/PgBiel/typst-oxifmt/issues/15))
   - For example, instead of `strfmt("{fmt-x}", fmt-x: 10)`, write `strfmt("{_fmt-x}, _fmt-x: 10")` instead (or some other name with a different prefix).
-- Added thousands separator support, configurable with `strfmt(format, fmt-thousands-count: 3, fmt-thousands-separator: "")`. The first option defines how many digits should appear between each separator, and the second option controls the separator itself (default is empty string, disabling it).
+- Added thousands separator support, configurable with `strfmt(format, fmt-thousands-count: 3, fmt-thousands-separator: "")`. The first option defines how many digits should appear between each separator, and the second option controls the separator itself (default is empty string, disabling it). ([Issue #5](https://github.com/PgBiel/typst-oxifmt/issues/5))
   - For example, `strfmt("{}", 2000, fmt-thousands-separator: ",")` displays `"2,000"`.
   - Within the same example, adding `fmt-thousands-count: 2` would display `20,00` instead.
   - Numeric systems with irregular thousands separator distances will be supported in a future release.
-- Added support for numeric formatting of [fixed-point `decimal` numbers](https://typst.app/docs/reference/foundations/decimal/). They support the same format specifiers as floats, e.g. `{:e}` for exponential notation, `{:.3}` for a fixed precision and so on.
-- Fixed exponential notation formatting with very large numbers. Note that they might still need rounding to look good (e.g. `strfmt("{:.2e}", number)` instead of just `{:e}`).
+- Added support for numeric formatting of [fixed-point `decimal` numbers](https://typst.app/docs/reference/foundations/decimal/). They support the same format specifiers as floats, e.g. `{:e}` for exponential notation, `{:.3}` for a fixed precision and so on. ([Issue #11](https://github.com/PgBiel/typst-oxifmt/issues/11))
+- Fixed a rare case of wrong usage of types in strings in internal code, which could cause oxifmt to generate an error in upcoming Typst v0.14. **It is recommended to upgrade oxifmt to avoid this problem.**
+  - However, this only happened when a very rare formatting option was used (dynamic precision specifiers, which have a dollar sign `$`, e.g. `{:.prec$}`), so existing code is unlikely to be affected. Still a good idea to upgrade, though.
+- Fixed exponential notation formatting with very large numbers. Note that they might need rounding to look good (e.g. `strfmt("{:.2e}", number)` instead of just `{:e}`), but they will no longer cause an error. ([Issue #16](https://github.com/PgBiel/typst-oxifmt/issues/16))
 
 ### v0.2.1
 
