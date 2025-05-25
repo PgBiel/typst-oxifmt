@@ -136,6 +136,23 @@
   assert.eq(strfmt("{:e}", decimal("-132423")), "-1.32423e5")
   assert.eq(strfmt("{:011.5}", decimal("1234.5")), "01234.50000")
 }
+// Issue #16: large numbers
+#{
+  assert.eq(strfmt("{0:e}",10000000000000000000.0), "1e19")
+  assert.eq(strfmt("{0:e}",10000000000000000000), "1e19")
+  assert.eq(strfmt("{0:e}",float("inf")), "inf")
+  assert.eq(strfmt("{0:e}",float("-inf")), "-inf")
+  assert.eq(strfmt("{0:e}",float("nan")), "NaN")
+  assert.eq(strfmt("{0:e}",1e50), "1e50")
+  assert.eq(strfmt("{0:e}",1e-50), "1.0000000000000002e-50")
+  assert.eq(strfmt("{0:.0e}",1e-50), "1e-50")
+  assert.eq(strfmt("{0:e}",1e300), "0.9999999999999994e300")
+  assert.eq(strfmt("{0:.0e}",1e300), "1e300")
+  assert.eq(strfmt("{0:.0e}",1e-300), "1e-300")
+  assert.eq(strfmt("{0:e}",2.2250738585072014e-308), "2.2250738585072027e-308")
+  assert.eq(strfmt("{0:e}",1.7976931348623157e+308), "1.7976931348623146e308")
+  assert.eq(strfmt("{0:e}",-1.7976931348623157e+308), "-1.7976931348623146e308")
+}
 // DOC TESTS
 #{
   // --- Usage ---
