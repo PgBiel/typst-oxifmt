@@ -270,8 +270,8 @@ The tests succeeded if you received no error messages from the last command (ple
   - For example, instead of `strfmt("{fmt-x}", fmt-x: 10)`, write `strfmt("{_fmt-x}, _fmt-x: 10")` instead (or some other name with a different prefix).
 - Added thousands separator support, configurable with `strfmt(format, fmt-thousands-count: 3, fmt-thousands-separator: "")`. The first option defines how many digits should appear between each separator, and the second option controls the separator itself (default is empty string, disabling it).
   - For example, `strfmt("{}", 2000, fmt-thousands-separator: ",")` displays `"2,000"`.
-  - With the same example, adding `fmt-thousands-count: 2` would display `20,00` instead.
-  - Numeric systems with irregular thousands separator sizes will be supported in a future release.
+  - Within the same example, adding `fmt-thousands-count: 2` would display `20,00` instead.
+  - Numeric systems with irregular thousands separator distances will be supported in a future release.
 - Added support for numeric formatting of [fixed-point `decimal` numbers](https://typst.app/docs/reference/foundations/decimal/). They support the same format specifiers as floats, e.g. `{:e}` for exponential notation, `{:.3}` for a fixed precision and so on.
 - Fixed exponential notation formatting with very large numbers. Note that they might still need rounding to look good (e.g. `strfmt("{:.2e}", number)` instead of just `{:e}`).
 
