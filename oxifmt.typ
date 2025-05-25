@@ -316,7 +316,7 @@
 
   let f = float(num)
   let exponent = if f == 0 { 1 } else { calc.floor(calc.log(calc.abs(f), base: 10)) }
-  let mantissa = f / calc.pow(10, exponent)
+  let mantissa = f / calc.pow(10.0, exponent)
   let mantissa = _strfmt_with-precision(mantissa, precision)
 
   (mantissa, exponent-sign + _strfmt_stringify(exponent))
