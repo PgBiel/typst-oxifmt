@@ -616,7 +616,7 @@ parameter := argument '$'
   let named-replacements = replacements.named()
   let unnamed-format-index = 0
 
-  if fmt-decimal-separator != auto and type(fmt-decimal-separator) != str {
+  if fmt-decimal-separator != auto and type(fmt-decimal-separator) != _str-type {
     assert(
       false,
       message: "String formatter error: 'fmt-decimal-separator' must be a string or 'auto', got '" + str(type(fmt-decimal-separator)) + "' instead."
