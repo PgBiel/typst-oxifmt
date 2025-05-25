@@ -41,7 +41,7 @@
   assert.eq(strfmt("{}; {:07e}; {}; {}; {:?}", 1.532, 45000, -5.6, "a.b", "c.d", fmt-decimal-separator: ","), "1,532; 004,5e4; -5,6; a.b; \"c.d\"")
 
   // test custom decimal separators (II) - weird values
-  assert.eq(strfmt("{}; {:015e}; {}; {}; {:?}", 1.532, 45000, -5.6, "a.b", "c.d", fmt-decimal-separator: (a: 5)), "1(a: 5)532; 000004(a: 5)5e4; -5(a: 5)6; a.b; \"c.d\"")
+  assert.eq(strfmt("{}; {:015e}; {}; {}; {:?}", 1.532, 45000, -5.6, "a.b", "c.d", fmt-decimal-separator: repr((a: 5))), "1(a: 5)532; 000004(a: 5)5e4; -5(a: 5)6; a.b; \"c.d\"")
 }
 // Issue #6: UTF-8
 #{

@@ -603,28 +603,23 @@ parameter := argument '$'
   replacement
 }
 
-#let strfmt(format, ..replacements) = {
+#let strfmt(
+  format,
+  ..replacements,
+  fmt-decimal-separator: auto,
+  fmt-thousands-count: 3,
+  fmt-thousands-separator: "",
+) = {
   if format == "" { return "" }
   let formats = _strfmt_formatparser(format)
   let num-replacements = replacements.pos()
   let named-replacements = replacements.named()
   let unnamed-format-index = 0
-  let fmt-decimal-separator = auto
-  let fmt-thousands-count = 3
-  let fmt-thousands-separator = ""
 
-  for (name, value) in named-replacements {
-    if name == "fmt-decimal-separator" {
-      fmt-decimal-separator = named-replacements.remove(name)
-    } else if name == "fmt-thousands-count" {
-      fmt-thousands-count = named-replacements.remove(name)
-    } else if name == "fmt-thousands-separator" {
-      fmt-thousands-separator = named-replacements.remove(name)
-    } else if name.starts-with("fmt-") {
-      assert(false, message: "String formatter error: unknown format option '" + name + "'. Keys prefixed with 'fmt-' are reserved for future oxifmt options. Please use a different key name.")
-    }
-  }
-
+  assert(
+    fmt-decimal-separator == auto or type(fmt-decimal-separator) == str,
+    message: "String formatter error: 'fmt-decimal-separator' must be a string, got '" + str(type(fmt-decimal-separator)) + "' instead."
+  )
   assert(
     type(fmt-thousands-count) == _int-type,
     message: "String formatter error: 'fmt-thousands-count' must be an integer, got '" + str(type(fmt-thousands-count)) + "' instead."
@@ -637,6 +632,12 @@ parameter := argument '$'
     type(fmt-thousands-separator) == _str-type,
     message: "String formatter error: 'fmt-thousands-separator' must be a string (or empty string, \"\", to disable), got '" + str(type(fmt-thousands-separator)) + "' instead."
   )
+
+  for (name, _) in named-replacements {
+    if name.starts-with("fmt-") {
+      assert(false, message: "String formatter error: unknown format option '" + name + "'. Keys prefixed with 'fmt-' are reserved for future oxifmt options. Please use a different key name.")
+    }
+  }
 
   let parts = ()
   let last-span-end = 0
