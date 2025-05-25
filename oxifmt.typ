@@ -609,9 +609,21 @@ parameter := argument '$'
   let num-replacements = replacements.pos()
   let named-replacements = replacements.named()
   let unnamed-format-index = 0
-  let fmt-decimal-separator = if "fmt-decimal-separator" in named-replacements { named-replacements.at("fmt-decimal-separator") } else { auto }
-  let fmt-thousands-count = if "fmt-thousands-count" in named-replacements { named-replacements.at("fmt-thousands-count") } else { 3 }
-  let fmt-thousands-separator = if "fmt-thousands-separator" in named-replacements { named-replacements.at("fmt-thousands-separator") } else { "" }
+  let fmt-decimal-separator = auto
+  let fmt-thousands-count = 3
+  let fmt-thousands-separator = ""
+
+  for (name, value) in named-replacements {
+    if name == "fmt-decimal-separator" {
+      fmt-decimal-separator = named-replacements.remove(name)
+    } else if name == "fmt-thousands-count" {
+      fmt-thousands-count = named-replacements.remove(name)
+    } else if name == "fmt-thousands-separator" {
+      fmt-thousands-separator = named-replacements.remove(name)
+    } else if name.starts-with("fmt-") {
+      assert(false, message: "String formatter error: unknown format option '" + name + "'. Keys prefixed with 'fmt-' are reserved for future oxifmt options. Please use a different key name.")
+    }
+  }
 
   assert(
     type(fmt-thousands-count) == _int-type,
