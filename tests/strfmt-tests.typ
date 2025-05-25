@@ -152,6 +152,44 @@
 }
 // DOC TESTS
 #{
+  // --- Quick examples ---
+  {
+    // "User John has 10 apples."
+    assert.eq(
+      "User John has 10 apples.",
+      strfmt("User {} has {} apples.", "John", 10)
+    )
+
+    // "if exp > 100 { true }"
+    assert.eq(
+      "if exp > 100 { true }",
+      strfmt("if {var} > {num} {{ true }}", var: "exp", num: 100)
+    )
+
+    // "1.10e2 meters"
+    assert.eq(
+      "1.10e2 meters",
+      strfmt("{:.2e} meters", 110.0)
+    )
+
+    // "20_000 players have more than +002,3 points."
+    assert.eq(
+      "20_000 players have more than +002,300 points.",
+      strfmt(
+        "{} players have more than {:+08.3} points.",
+        20000,
+        2.3,
+        fmt-decimal-separator: ",",
+        fmt-thousands-separator: "_"
+      )
+    )
+
+    // "The byte value is 0x8C or 10001100"
+    assert.eq(
+      "The byte value is 0x8C or 10001100",
+      strfmt("The byte value is {:#02X} or {0:08b}", 140)
+    )
+  }
   // --- Usage ---
   {
     let s = strfmt("I'm {}. I have {num} cars. I'm {0}. {} is {{cool}}.", "John", "Carl", num: 10)

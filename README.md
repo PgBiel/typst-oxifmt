@@ -6,6 +6,32 @@ A few extras (beyond the Rust-like syntax) will be added over time, though (feel
 
 **Compatible with:** [Typst](https://github.com/typst/typst) v0.4.0+
 
+## Quick examples
+
+```typ
+
+// "User John has 10 apples."
+#strfmt("User {} has {} apples.", "John", 10)
+
+// "if exp > 100 { true }"
+#strfmt("if {var} > {num} {{ true }}", var: "exp", num: 100)
+
+// "1.10e2 meters"
+#strfmt("{:.2e} meters", 110.0)
+
+// "20_000 players have more than +002,300 points."
+#strfmt(
+  "{} players have more than {:+08.3} points.",
+  20000,
+  2.3,
+  fmt-decimal-separator: ",",
+  fmt-thousands-separator: "_"
+)
+
+// "The byte value is 0x8C or 10001100"
+#strfmt("The byte value is {:#02X} or {0:08b}", 140)
+```
+
 ## Table of Contents
 
 - [Usage](#usage)
