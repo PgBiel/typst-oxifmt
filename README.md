@@ -9,6 +9,7 @@ A few extras (beyond the Rust-like syntax) will be added over time, though (feel
 ## Quick examples
 
 ```typ
+#import "@preview/oxifmt:0.3.0": strfmt
 
 // "User John has 10 apples."
 #strfmt("User {} has {} apples.", "John", 10)
