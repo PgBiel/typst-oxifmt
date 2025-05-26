@@ -152,6 +152,44 @@
 }
 // DOC TESTS
 #{
+  // --- Quick examples ---
+  {
+    // "User John has 10 apples."
+    assert.eq(
+      "User John has 10 apples.",
+      strfmt("User {} has {} apples.", "John", 10)
+    )
+
+    // "if exp > 100 { true }"
+    assert.eq(
+      "if exp > 100 { true }",
+      strfmt("if {var} > {num} {{ true }}", var: "exp", num: 100)
+    )
+
+    // "1.10e2 meters"
+    assert.eq(
+      "1.10e2 meters",
+      strfmt("{:.2e} meters", 110.0)
+    )
+
+    // "20_000 players have more than +002,3 points."
+    assert.eq(
+      "20_000 players have more than +002,300 points.",
+      strfmt(
+        "{} players have more than {:+08.3} points.",
+        20000,
+        2.3,
+        fmt-decimal-separator: ",",
+        fmt-thousands-separator: "_"
+      )
+    )
+
+    // "The byte value is 0x8C or 10001100"
+    assert.eq(
+      "The byte value is 0x8C or 10001100",
+      strfmt("The byte value is {:#02X} or {0:08b}", 140)
+    )
+  }
   // --- Usage ---
   {
     let s = strfmt("I'm {}. I have {num} cars. I'm {0}. {} is {{cool}}.", "John", "Carl", num: 10)
@@ -205,8 +243,17 @@
     let s = strfmt("{0:e} {0:E} {0:+.9e} | {1:e} | {2:.4E}", 124.2312, 50, -0.02)
     assert.eq(s, "1.242312e2 1.242312E2 +1.242312000e2 | 5e1 | -2.0000E-2")
   }
+  // Custom options
   {
     let s = strfmt("{0} {0:.6} {0:.5e}", 1.432, fmt-decimal-separator: ",")
     assert.eq(s, "1,432 1,432000 1,43200e0")
+  }
+  {
+    let s = strfmt("{}", 20000, fmt-thousands-separator: "_")
+    assert.eq(s, "20_000")
+  }
+  {
+    let s = strfmt("{}", 20000, fmt-thousands-count: 2, fmt-thousands-separator: "_")
+    assert.eq(s, "2_00_00")
   }
 }
