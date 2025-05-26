@@ -273,8 +273,10 @@ The tests succeeded if you received no error messages from the last command (ple
   - Within the same example, adding `fmt-thousands-count: 2` would display `20,00` instead.
   - Numeric systems with irregular thousands separator distances will be supported in a future release.
 - Added support for numeric formatting of [fixed-point `decimal` numbers](https://typst.app/docs/reference/foundations/decimal/). They support the same format specifiers as floats, e.g. `{:e}` for exponential notation, `{:.3}` for a fixed precision and so on. ([Issue #11](https://github.com/PgBiel/typst-oxifmt/issues/11))
+- oxifmt is now dual-licensed as MIT or Apache-2.0 (previously just MIT).
+- Fixed some bugs when formatting `inf` and `NaN`.
 - Fixed a rare case of wrong usage of types in strings in internal code, which could cause oxifmt to generate an error in upcoming Typst v0.14. **It is recommended to upgrade oxifmt to avoid this problem.**
-  - However, this only happened when a very rare formatting option was used (dynamic precision specifiers, which have a dollar sign `$`, e.g. `{:.prec$}`), so existing code is unlikely to be affected. Still a good idea to upgrade, though.
+  - However, this was only triggered when a very rare formatting option was used (dynamic precision specifiers, which have a dollar sign `$`, e.g. `{:.prec$}`), so existing code is unlikely to be affected. Still a good idea to upgrade, though.
 - Fixed exponential notation formatting with very large numbers. Note that they might need rounding to look good (e.g. `strfmt("{:.2e}", number)` instead of just `{:e}`), but they will no longer cause an error. ([Issue #16](https://github.com/PgBiel/typst-oxifmt/issues/16))
 
 ### v0.2.1
