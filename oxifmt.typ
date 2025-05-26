@@ -436,7 +436,7 @@ parameter := argument '$'
   }
 
   if precision-lit == "*" {
-    panic("String formater error: Precision specification of type `.*` is not supported yet (from '{" + fullname.replace("{", "{{").replace("}", "}}") + "}'). Try specifying your desired precision directly on the format spec, e.g. `.5`, or through some argument, e.g. `.name$` to take it from the 'name' named argument.")
+    panic("String formatter error: Precision specification of type `.*` is not supported yet (from '{" + fullname.replace("{", "{{").replace("}", "}}") + "}'). Try specifying your desired precision directly on the format spec, e.g. `.5`, or through some argument, e.g. `.name$` to take it from the 'name' named argument.")
   }
 
   let align = if align == "" {
