@@ -111,7 +111,7 @@
       }
     } else if character == "}" {
       last-was-lbracket = false
-      if current-fmt-name == none {
+      if current-fmt-span == none {
         if last-was-rbracket {
           last-was-rbracket = false  // escape }}
           result.push((escape: (escaped: "}", span: (last-i, i + 1))))
