@@ -132,6 +132,9 @@
   assert.eq(strfmt("{:e}", decimal("132423")), "1.32423e5")
   assert.eq(strfmt("{:e}", decimal("-132423")), "-1.32423e5")
   assert.eq(strfmt("{:011.5}", decimal("1234.5")), "01234.50000")
+
+  // Issue #23: decimal exponential
+  assert.eq(strfmt("{:e}", decimal("0.31")), "3.1e-1")
 }
 // Issue #16: large numbers
 #{
