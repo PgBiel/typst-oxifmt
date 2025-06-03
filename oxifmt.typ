@@ -88,6 +88,8 @@
   // -- parsing state --
   let current-fmt-span = none
   let current-fmt-name = none
+  // if we're at {abc:...|, i.e. after a colon in {}
+  let fmt-name-just-had-colon = false
   // if the last character was an unescaped {
   let last-was-lbracket = false
   // if the last character was an unescaped }
@@ -126,17 +128,26 @@
           // outside a span ({...} {{ <-) => emit an 'escaped' token
           current-fmt-span = none  // cancel this span
           current-fmt-name = none
+          fmt-name-just-had-colon = false
           result.push((escape: (escaped: "{", span: (last-i, i + 1))))
         } else {
-          panic("String formatter error: internal error: invalid left bracket state")
+          // { ... :{{| <--- excessive { not used for padding
+          excessive-lbracket()
         }
       } else if current-fmt-span == none {
         // begin span
         current-fmt-span = (i, none)
         current-fmt-name = ""
+        fmt-name-just-had-colon = false
 
         // indicate we just started a span
         // in case it is escaped right afterwards
+        last-was-lbracket = true
+      } else if fmt-name-just-had-colon {
+        // delay erroring on mid-span { if this { might be used for padding
+        // e.g. {a:{<5} => formats "bc as "{{{bc"
+        current-fmt-name += character
+        fmt-name-just-had-colon = false
         last-was-lbracket = true
       } else {
         // if in the middle of a larger span ({ ... { <-):
@@ -154,24 +165,44 @@
           // in case this is an escaped }
           last-was-rbracket = true
         }
+      } else if fmt-name-just-had-colon {
+        // delay closing span with } if this } might be used for padding
+        // e.g. {a:}<5} => formats "bc" as "}}}bc"
+        current-fmt-name += character
+        fmt-name-just-had-colon = false
+        last-was-rbracket = true
+      } else if last-was-rbracket { // can only get here after a colon
+        // { ... :}} <--- excessive } not used for padding, close before
+        // ignore the last }
+        current-fmt-name = current-fmt-name.slice(0, current-fmt-name.len() - 1)
+        // stop the span here
+        (result, current-fmt-span, current-fmt-name) = write-format-span(last-i, result, current-fmt-span, current-fmt-name)
+        fmt-name-just-had-colon = false
+        last-was-rbracket = true
       } else {
         // { ... } <--- ok, close the previous span
         // Do this eagerly, escaping } inside { ... } is invalid
         (result, current-fmt-span, current-fmt-name) = write-format-span(i, result, current-fmt-span, current-fmt-name)
+        fmt-name-just-had-colon = false
       }
     } else {
+      if last-was-lbracket and current-fmt-span.first() != last-i and character not in ("<", "^", ">") {
+        // { ... :{} <--- excessive { not used for padding
+        excessive-lbracket()
+      }
       if last-was-rbracket {
         if current-fmt-span == none {
           // {...} }A <--- non-escaped } with no matching {
           excessive-rbracket()
-        } else {
-          // { ... }A <--- span should have been eagerly closed already
-          panic("String formatter error: internal error: invalid right bracket state")
+        } else if character not in ("<", "^", ">") {
+          // { ... :}} <--- excessive } not used for padding
+          excessive-rbracket()
         }
       }
       // {abc <--- add character to the format name
       if current-fmt-name != none {
         current-fmt-name += character
+        fmt-name-just-had-colon = character == ":"
       }
       last-was-lbracket = false
       last-was-rbracket = false
@@ -185,6 +216,7 @@
     if last-was-rbracket {
       // ... } <--- ok, close span
       (result, current-fmt-span, current-fmt-name) = write-format-span(last-i, result, current-fmt-span, current-fmt-name)
+      fmt-name-just-had-colon = false
     } else {
       // {abcd| <--- string ended with unclosed span
       missing-rbracket()
