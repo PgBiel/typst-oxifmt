@@ -114,11 +114,7 @@
       if current-fmt-name == none {
         if last-was-rbracket {
           last-was-rbracket = false  // escape }}
-          if current-fmt-name != none {
-            current-fmt-name += character
-          } else {
-            result.push((escape: (escaped: "}", span: (last-i, i + 1))))
-          }
+          result.push((escape: (escaped: "}", span: (last-i, i + 1))))
         } else {
           // delay erroring on unmatched } to the next iteration
           // in case this is an escaped }
