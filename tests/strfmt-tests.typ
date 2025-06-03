@@ -11,7 +11,9 @@
   assert.eq(strfmt("a{{}}b ={}{}= c{0}d", false, (a: "55", b: 20.3)), "a{}b =false(a: \"55\", b: 20.3)= cfalsed")
 
   // test escaping {{ }} from inside { } formats
-  assert.eq(strfmt("a{b{{b}}b}", ..("b{b}b": 5)), "a5")
+  // (this is now invalid and should error)
+  // assert.eq(strfmt("a{b{{b}}b}", ..("b{b}b": 5)), "a5")
+  // assert.eq(strfmt("a{b}}b}", ..("b}b": 5)), "a5")
 
   // test 0 prefix with numbers, but also using 0 as a non-numeric affix
   assert.eq(strfmt("{:08}|{0:0<8}|{0:0>8}|{0:0^8}", 120), "00000120|12000000|00000120|000120000")
@@ -152,6 +154,12 @@
   assert.eq(strfmt("{0:e}",2.2250738585072014e-308), "2.2250738585072027e-308")
   assert.eq(strfmt("{0:e}",1.7976931348623157e+308), "1.7976931348623146e308")
   assert.eq(strfmt("{0:e}",-1.7976931348623157e+308), "-1.7976931348623146e308")
+}
+// Issue #17: should not escape bracket in format var name
+#{
+  assert.eq(strfmt("{{{}}}", 1), "{1}")
+  assert.eq(strfmt("{{"), "{")
+  assert.eq(strfmt("}}"), "}")
 }
 // DOC TESTS
 #{
