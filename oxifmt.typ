@@ -276,15 +276,7 @@
     // Normalize decimals with larger scales than is needed
     let fractional = fractional.sum(default: "").trim("0", at: end)
     let (integral, fractional, exponent) = if num > -1 and num < 1 and fractional != "" {
-      let first-non-zero = fractional.position("1")
-      if first-non-zero == none { first-non-zero = fractional.position("2") }
-      if first-non-zero == none { first-non-zero = fractional.position("3") }
-      if first-non-zero == none { first-non-zero = fractional.position("4") }
-      if first-non-zero == none { first-non-zero = fractional.position("5") }
-      if first-non-zero == none { first-non-zero = fractional.position("6") }
-      if first-non-zero == none { first-non-zero = fractional.position("7") }
-      if first-non-zero == none { first-non-zero = fractional.position("8") }
-      if first-non-zero == none { first-non-zero = fractional.position("9") }
+      let first-non-zero = fractional.codepoints().position(s => s != "0")
       assert(first-non-zero != none, message: "String formatter internal error: expected non-zero fractional digit")
 
       // Integral part is zero
