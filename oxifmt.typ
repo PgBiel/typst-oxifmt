@@ -5,6 +5,7 @@
 #let _float-type = type(5.5)
 #let _str-type = type("")
 #let _label-type = type(<hello>)
+#let _arr-type = type(())
 
 #let _minus-sign = "\u{2212}"
 #let using-080 = type(type(5)) != _str-type
@@ -30,6 +31,39 @@
     }
     res
   }
+}
+
+// Splits an array into dynamic chunk sizes.
+// 'chunks' is an array e.g. (1, 2, 3) indicating
+// the sizes of each chunk. The last size is repeated if there
+// are more elements than the chunks combined can cover.
+//
+// For example, if arr = ("a", "b", "c", "d", "e", "f", "g", "h", "i") and
+// chunks = (2, 3), this will return
+// (("a", "b"), ("c", "d", "e"), ("f", "g", "h"), ("i",))
+#let _arr-dyn-chunks(arr, chunks) = {
+  let i = 0
+  let res = ()
+  let chunk-i = 0
+  if chunks == () {
+    return ()
+  }
+
+  for element in arr {
+    if i == 0 {
+      res.push(())
+      i = chunks.at(chunk-i)
+      if i <= 0 {
+        assert(false, message: "String formatter error: internal error: received chunk of invalid size")
+      }
+      if chunk-i + 1 != chunks.len() {
+        chunk-i += 1
+      }
+    }
+    res.last().push(element)
+    i -= 1
+  }
+  res
 }
 
 #let _float-is-nan = if using-0110 {
@@ -345,7 +379,12 @@ parameter := argument '$'
       }
       let (integral, ..fractional) = string-replacement.split(".")
       if fmt-thousands-separator != "" and not is-nan and not is-inf {
-        integral = _arr-chunks(integral.codepoints().rev(), fmt-thousands-count)
+        let digit-groups = if type(fmt-thousands-count) == _arr-type {
+          _arr-dyn-chunks(integral.codepoints().rev(), fmt-thousands-count)
+        } else {
+          _arr-chunks(integral.codepoints().rev(), fmt-thousands-count)
+        }
+        integral = digit-groups
           .join(fmt-thousands-separator.codepoints().rev())
           .rev()
           .join()
@@ -537,7 +576,12 @@ parameter := argument '$'
 
     // Format with thousands AFTER zeroes, but BEFORE applying textual prefixes
     if fmt-thousands-separator != "" and not is-nan and not is-inf {
-      integral = _arr-chunks(integral.codepoints().rev(), fmt-thousands-count)
+      let digit-groups = if type(fmt-thousands-count) == _arr-type {
+        _arr-dyn-chunks(integral.codepoints().rev(), fmt-thousands-count)
+      } else {
+        _arr-chunks(integral.codepoints().rev(), fmt-thousands-count)
+      }
+      integral = digit-groups
         .join(fmt-thousands-separator.codepoints().rev())
         .rev()
         .join()
@@ -606,17 +650,23 @@ parameter := argument '$'
     )
   }
 
-  if type(fmt-thousands-count) != _int-type {
+  if type(fmt-thousands-count) == _arr-type {
     assert(
-      false,
-      message: "String formatter error: 'fmt-thousands-count' must be an integer, got '" + str(type(fmt-thousands-count)) + "' instead."
+      fmt-thousands-count.all(c => type(c) == _int-type and c > 0),
+      message: "String formatter error: 'fmt-thousands-count' must be a positive integer or array of positive integers, got an array with at least one element that isn't a positive integer."
     )
-  }
-
-  if fmt-thousands-count <= 0 {
+    assert(fmt-thousands-count != (), message: "String formatter error: 'fmt-thousands-count' must not be an empty array, but an array of positive integers.")
+  } else if type(fmt-thousands-count) == _int-type {
+    if fmt-thousands-count <= 0 {
+      assert(
+        false,
+        message: "String formatter error: 'fmt-thousands-count' must be a positive integer, got " + str(fmt-thousands-count) + " instead."
+      )
+    }
+  } else {
     assert(
       false,
-      message: "String formatter error: 'fmt-thousands-count' must be a positive integer, got " + str(fmt-thousands-count) + " instead."
+      message: "String formatter error: 'fmt-thousands-count' must be a positive integer or array of positive integers, got '" + str(type(fmt-thousands-count)) + "' instead."
     )
   }
 
