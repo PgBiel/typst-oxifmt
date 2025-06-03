@@ -4,5 +4,5 @@ version = "0.3.0"
 authors = ["PgBiel <https://github.com/PgBiel>"]
 license = "MIT OR Apache-2.0"
 description = "Convenient Rust-like string formatting in Typst"
-entrypoint = "oxifmt.typ"
+entrypoint = "lib.typ"
 repository = "https://github.com/PgBiel/typst-oxifmt"

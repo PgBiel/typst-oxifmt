@@ -1,4 +1,5 @@
-#import "../oxifmt.typ": strfmt, using-0120
+#import "../lib.typ": strfmt
+#import "../oxifmt.typ": using-0120
 
 #{
   // test basics (sequential args, named args, pos args)
