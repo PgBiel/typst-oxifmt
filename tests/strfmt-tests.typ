@@ -105,9 +105,27 @@
   assert.eq(strfmt("{:#b}", 255, fmt-thousands-count: 1, fmt-thousands-separator: "_"), "0b1_1_1_1_1_1_1_1")
   assert.eq(strfmt("{:#x}", -16 * 16 * 16 * 16 * 15, fmt-thousands-count: 2, fmt-thousands-separator: "_"), "-0xf_00_00")
   assert.eq(strfmt("{:o}", -16 * 16 * 16 * 16 * 15, fmt-thousands-count: 4, fmt-thousands-separator: "_"), "-360_0000")
-  assert.eq(strfmt("{:05}", float("nan"), fmt-thousands-count: 2, fmt-thousands-separator: "_"), "00NaN")
-  assert.eq(strfmt("{:05}", float("inf"), fmt-thousands-count: 2, fmt-thousands-separator: "_"), "00inf")
-  assert.eq(strfmt("{:05}", -float("inf"), fmt-thousands-count: 2, fmt-thousands-separator: "_"), "-0inf")
+  assert.eq(strfmt("{:08}", float("nan"), fmt-thousands-count: 2, fmt-thousands-separator: "_"), "00000NaN")
+  assert.eq(strfmt("{:08}", float("inf"), fmt-thousands-count: 2, fmt-thousands-separator: "_"), "00000inf")
+  assert.eq(strfmt("{:08}", -float("inf"), fmt-thousands-count: 2, fmt-thousands-separator: "_"), "-0000inf")
+
+  // Issue #21: variable group sizes
+  assert.eq(strfmt("{}", 10, fmt-thousands-count: (3, 2), fmt-thousands-separator: "_"), "10")
+  assert.eq(strfmt("{}", 1000000, fmt-thousands-count: (3, 2), fmt-thousands-separator: ","), "10,00,000")
+  assert.eq(strfmt("{}", 1000000, fmt-thousands-count: (3, 2, 2, 2, 2, 2, 2, 2), fmt-thousands-separator: ","), "10,00,000")
+  assert.eq(strfmt("{}", 10000000000, fmt-thousands-count: (3, 2), fmt-thousands-separator: ","), "10,00,00,00,000")
+  assert.eq(strfmt("{}", 10000000000, fmt-thousands-count: (1, 2, 3), fmt-thousands-separator: ","), "10,000,000,00,0")
+  assert.eq(strfmt("{}", 10000000.3231, fmt-thousands-count: (1, 2, 3), fmt-thousands-separator: "_"), "10_000_00_0.3231")
+  assert.eq(strfmt("{}", float("nan"), fmt-thousands-count: (1, 2, 3), fmt-thousands-separator: "_"), "NaN")
+  assert.eq(strfmt("{}", float("inf"), fmt-thousands-count: (1, 2, 3), fmt-thousands-separator: "_"), "inf")
+  assert.eq(strfmt("{}", -float("inf"), fmt-thousands-count: (1, 2, 3), fmt-thousands-separator: "_"), "-inf")
+  assert.eq(strfmt("{:014}", -23003, fmt-thousands-count: (4, 4, 2), fmt-thousands-separator: "|"), "-0|00|00|0002|3003")
+  assert.eq(strfmt("{:#b}", 255, fmt-thousands-count: (1, 2, 1, 2, 1), fmt-thousands-separator: "_"), "0b1_1_11_1_11_1")
+  assert.eq(strfmt("{:#x}", -16 * 16 * 16 * 16 * 15, fmt-thousands-count: (3, 2), fmt-thousands-separator: "_"), "-0xf0_000")
+  assert.eq(strfmt("{:o}", -16 * 16 * 16 * 16 * 15, fmt-thousands-count: (4, 2, 1), fmt-thousands-separator: "_"), "-3_60_0000")
+  assert.eq(strfmt("{:08}", float("nan"), fmt-thousands-count: (2, 3), fmt-thousands-separator: "_"), "00000NaN")
+  assert.eq(strfmt("{:08}", float("inf"), fmt-thousands-count: (2, 3), fmt-thousands-separator: "_"), "00000inf")
+  assert.eq(strfmt("{:08}", -float("inf"), fmt-thousands-count: (2, 3), fmt-thousands-separator: "_"), "-0000inf")
 }
 // Issue #11: Decimals
 #if using-0120 {
