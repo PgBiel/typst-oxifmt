@@ -88,8 +88,8 @@
   // -- parsing state --
   let current-fmt-span = none
   let current-fmt-name = none
-  // if we're at {abc:...|, i.e. after a colon in {}
-  let fmt-name-just-had-colon = false
+  // if we're at {abc:|, i.e. right after a colon in {}
+  let last-was-fmt-colon = false
   // if the last character was an unescaped {
   let last-was-lbracket = false
   // if the last character was an unescaped }
@@ -141,10 +141,10 @@
         // indicate we just started a span
         // in case it is escaped right afterwards
         last-was-lbracket = true
-      } else if fmt-name-just-had-colon and codepoints.len() > code-i + 1 and codepoints.at(code-i + 1) in ("<", "^", ">") {
+      } else if last-was-fmt-colon and codepoints.len() > code-i + 1 and codepoints.at(code-i + 1) in ("<", "^", ">") {
         // don't error on mid-span { if this { might be used for padding
         // 'escape' it right away
-        // e.g. {a:{<5} => formats "bc as "{{{bc"
+        // e.g. {a:{<5} => formats "bc" as "{{{bc"
         current-fmt-name += character
         last-was-lbracket = false
       } else {
@@ -153,7 +153,7 @@
         excessive-lbracket()
       }
 
-      fmt-name-just-had-colon = false
+      last-was-fmt-colon = false
     } else if character == "}" {
       last-was-lbracket = false
       if current-fmt-span == none {
@@ -165,7 +165,7 @@
           // in case this is an escaped }
           last-was-rbracket = true
         }
-      } else if fmt-name-just-had-colon and codepoints.len() > code-i + 1 and codepoints.at(code-i + 1) in ("<", "^", ">") {
+      } else if last-was-fmt-colon and codepoints.len() > code-i + 1 and codepoints.at(code-i + 1) in ("<", "^", ">") {
         // don't close span with } if this } might be used for padding
         // e.g. {a:}<5} => formats "bc" as "}}}bc"
         current-fmt-name += character
@@ -176,7 +176,7 @@
         (result, current-fmt-span, current-fmt-name) = write-format-span(i, result, current-fmt-span, current-fmt-name)
       }
 
-      fmt-name-just-had-colon = false
+      last-was-fmt-colon = false
     } else {
       if last-was-rbracket {
         if current-fmt-span == none {
@@ -189,11 +189,11 @@
       }
 
       if current-fmt-name == none {
-        fmt-name-just-had-colon = false
+        last-was-fmt-colon = false
       } else {
         // {abc <--- add character to the format name
         current-fmt-name += character
-        fmt-name-just-had-colon = character == ":"
+        last-was-fmt-colon = character == ":"
       }
       last-was-lbracket = false
       last-was-rbracket = false
@@ -208,7 +208,7 @@
     if last-was-rbracket {
       // ... } <--- ok, close span
       (result, current-fmt-span, current-fmt-name) = write-format-span(last-i, result, current-fmt-span, current-fmt-name)
-      fmt-name-just-had-colon = false
+      last-was-fmt-colon = false
     } else {
       // {abcd| <--- string ended with unclosed span
       missing-rbracket()
