@@ -131,8 +131,7 @@
           current-fmt-name = none
           result.push((escape: (escaped: "{", span: (last-i, i + 1))))
         } else {
-          // { ... :{{| <--- excessive { not used for padding
-          excessive-lbracket()
+          panic("String formatter error: internal error: invalid left bracket state")
         }
       } else if current-fmt-span == none {
         // begin span
@@ -179,17 +178,13 @@
 
       fmt-name-just-had-colon = false
     } else {
-      if last-was-lbracket and current-fmt-span.first() != last-i and character not in ("<", "^", ">") {
-        // { ... :{} <--- excessive { not used for padding
-        excessive-lbracket()
-      }
       if last-was-rbracket {
         if current-fmt-span == none {
           // {...} }A <--- non-escaped } with no matching {
           excessive-rbracket()
-        } else if character not in ("<", "^", ">") {
-          // { ... :}} <--- excessive } not used for padding
-          excessive-rbracket()
+        } else {
+          // { ... }A <--- span should have been eagerly closed already
+          panic("String formatter error: internal error: invalid right bracket state")
         }
       }
 
