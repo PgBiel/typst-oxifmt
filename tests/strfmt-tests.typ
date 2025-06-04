@@ -220,10 +220,10 @@
       strfmt("if {var} > {num} {{ true }}", var: "exp", num: 100)
     )
 
-    // "1.10e2 meters"
+    // "1.10e2 meters (**wow**)"
     assert.eq(
-      "1.10e2 meters",
-      strfmt("{:.2e} meters", 110.0)
+      "1.10e2 meters (**wow**)",
+      strfmt("{:.2e} meters ({:*^7})", 110.0, "wow")
     )
 
     // "20_000 players have more than +002,3 points."
@@ -309,5 +309,9 @@
   {
     let s = strfmt("{}", 20000, fmt-thousands-count: 2, fmt-thousands-separator: "_")
     assert.eq(s, "2_00_00")
+  }
+  {
+    let s = strfmt("{}", 1000000, fmt-thousands-count: (3, 2), fmt-thousands-separator: ",")
+    assert.eq(s, "10,00,000")
   }
 }

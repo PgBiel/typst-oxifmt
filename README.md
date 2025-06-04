@@ -1,4 +1,4 @@
-# typst-oxifmt (v0.3.0)
+# typst-oxifmt (v1.0.0)
 
 A Typst library that brings convenient string formatting and interpolation through the `strfmt` function. Its syntax is taken directly from Rust's `format!` syntax, so feel free to read its page for more information (https://doc.rust-lang.org/std/fmt/); however, this README should have enough information and examples for all expected uses of the library. Only a few things aren't supported from the Rust syntax, such as the `p` (pointer) format type, or the `.*` precision specifier. Check out the ["Examples" section](#examples) for more.
 
@@ -9,7 +9,7 @@ A few extras (beyond the Rust-like syntax) will be added over time, though (feel
 ## Quick examples
 
 ```typ
-#import "@preview/oxifmt:0.3.0": strfmt
+#import "@preview/oxifmt:1.0.0": strfmt
 
 // "User John has 10 apples."
 #strfmt("User {} has {} apples.", "John", 10)
@@ -17,8 +17,8 @@ A few extras (beyond the Rust-like syntax) will be added over time, though (feel
 // "if exp > 100 { true }"
 #strfmt("if {var} > {num} {{ true }}", var: "exp", num: 100)
 
-// "1.10e2 meters"
-#strfmt("{:.2e} meters", 110.0)
+// "1.10e2 meters (**wow**)"
+#strfmt("{:.2e} meters ({:*^7})", 110.0, "wow")
 
 // "20_000 players have more than +002,300 points."
 #strfmt(
@@ -50,7 +50,7 @@ A few extras (beyond the Rust-like syntax) will be added over time, though (feel
 You can use this library through Typst's package manager (for Typst v0.6.0+):
 
 ```typ
-#import "@preview/oxifmt:0.3.0": strfmt
+#import "@preview/oxifmt:1.0.0": strfmt
 ```
 
 For older Typst versions, download the `oxifmt.typ` file either from Releases or directly from the repository. Then, move it to your project's folder, and write at the top of your Typst file(s):
@@ -64,7 +64,7 @@ Doing the above will give you access to the main function provided by this libra
 Its syntax is almost identical to Rust's `format!` (as specified here: https://doc.rust-lang.org/std/fmt/). You can escape formats by duplicating braces (`{{` and `}}` become `{` and `}`). Here's an example (see more examples in the file `tests/strfmt-tests.typ`):
 
 ```typ
-#import "@preview/oxifmt:0.3.0": strfmt
+#import "@preview/oxifmt:1.0.0": strfmt
 
 #let s = strfmt("I'm {}. I have {num} cars. I'm {0}. {} is {{cool}}.", "John", "Carl", num: 10)
 #assert.eq(s, "I'm John. I have 10 cars. I'm John. Carl is {cool}.")
@@ -104,7 +104,7 @@ You can use `{:spec}` to customize your output. See the Rust docs linked above f
 Some examples:
 
 ```typ
-#import "@preview/oxifmt:0.3.0": strfmt
+#import "@preview/oxifmt:1.0.0": strfmt
 
 #let s1 = strfmt("{0:?}, {test:+012e}, {1:-<#8x}", "hi", -74, test: 569.4)
 #assert.eq(s1, "\"hi\", +00005.694e2, -0x4a---")
@@ -120,7 +120,7 @@ Some examples:
 
 - **Inserting labels, text and numbers into strings:**
 ```typ
-#import "@preview/oxifmt:0.3.0": strfmt
+#import "@preview/oxifmt:1.0.0": strfmt
 
 #let s = strfmt("First: {}, Second: {}, Fourth: {3}, Banana: {banana} (brackets: {{escaped}})", 1, 2.1, 3, label("four"), banana: "Banana!!")
 #assert.eq(s, "First: 1, Second: 2.1, Fourth: four, Banana: Banana!! (brackets: {escaped})")
@@ -128,7 +128,7 @@ Some examples:
 
 - **Forcing `repr()` with `{:?}`** (which adds quotes around strings, and other things - basically represents a Typst value):
 ```typ
-#import "@preview/oxifmt:0.3.0": strfmt
+#import "@preview/oxifmt:1.0.0": strfmt
 
 #let s = strfmt("The value is: {:?} | Also the label is {:?}", "something", label("label"))
 #assert.eq(s, "The value is: \"something\" | Also the label is <label>")
@@ -136,7 +136,7 @@ Some examples:
 
 - **Inserting other types than numbers and strings** (for now, they will always use `repr()`, even without `{...:?}`, although that is more explicit):
 ```typ
-#import "@preview/oxifmt:0.3.0": strfmt
+#import "@preview/oxifmt:1.0.0": strfmt
 
 #let s = strfmt("Values: {:?}, {1:?}, {stuff:?}", (test: 500), ("a", 5.1), stuff: [a])
 #assert.eq(s, "Values: (test: 500), (\"a\", 5.1), [a]")
@@ -144,7 +144,7 @@ Some examples:
 
 - **Padding to a certain width with characters:** Use `{:x<8}`, where `x` is the **character to pad with** (e.g. space or `_`, but can be anything), `<` is the **alignment of the original text** relative to the padding (can be `<` for left aligned (padding goes to the right), `>` for right aligned (padded to its left) and `^` for center aligned (padded at both left and right)), and `8` is the **desired total width** (padding will add enough characters to reach this width; if the replacement string already has this width, no padding will be added):
 ```typ
-#import "@preview/oxifmt:0.3.0": strfmt
+#import "@preview/oxifmt:1.0.0": strfmt
 
 #let s = strfmt("Left5 {:-<5}, Right6 {:=>6}, Center10 {centered: ^10?}, Left3 {tleft:_<3}", "xx", 539, tleft: "okay", centered: [a])
 #assert.eq(s, "Left5 xx---, Right6 ===539, Center10    [a]    , Left3 okay")
@@ -153,7 +153,7 @@ Some examples:
 
 - **Padding numbers with zeroes to the left:** It's a similar functionality to the above, however you write `{:08}` for 8 characters (for instance) - note that any characters in the number's representation matter for width (including sign, dot and decimal part):
 ```typ
-#import "@preview/oxifmt:0.3.0": strfmt
+#import "@preview/oxifmt:1.0.0": strfmt
 
 #let s = strfmt("Left-padded7 numbers: {:07} {:07} {:07} {3:07}", 123, -344, 44224059, 45.32)
 #assert.eq(s, "Left-padded7 numbers: 0000123 -000344 44224059 0045.32")
@@ -161,7 +161,7 @@ Some examples:
 
 - **Defining padding-to width using parameters, not literals:** If you want the desired replacement width (the `8` in `{:08}` or `{: ^8}`) to be passed via parameter (instead of being hardcoded into the format string), you can specify `parameter$` in place of the width, e.g. `{:02$}` to take it from the third positional parameter, or `{:a>banana$}` to take it from the parameter named `banana` - note that the chosen parameter **must be an integer** (desired total width):
 ```typ
-#import "@preview/oxifmt:0.3.0": strfmt
+#import "@preview/oxifmt:1.0.0": strfmt
 
 #let s = strfmt("Padding depending on parameter: {0:02$} and {0:a>banana$}", 432, 0, 5, banana: 9)
 #assert.eq(s, "Padding depending on parameter: 00432 aaaaaa432")  // widths 5 and 9
@@ -169,7 +169,7 @@ Some examples:
 
 - **Displaying `+` on positive numbers:** Just add a `+` at the "beginning", i.e., before the `#0` (if either is there), or after the custom fill and align (if it's there and not `0` - see [Grammar](#grammar) for the exact positioning), like so:
 ```typ
-#import "@preview/oxifmt:0.3.0": strfmt
+#import "@preview/oxifmt:1.0.0": strfmt
 
 #let s = strfmt("Some numbers: {:+} {:+08}; With fill and align: {:_<+8}; Negative (no-op): {neg:+}", 123, 456, 4444, neg: -435)
 #assert.eq(s, "Some numbers: +123 +0000456; With fill and align: +4444___; Negative (no-op): -435")
@@ -178,7 +178,7 @@ Some examples:
 
 - **Converting numbers to bases 2, 8 and 16:** Use one of the following specifier types (i.e., characters which always go at the very end of the format): `b` (binary), `o` (octal), `x` (lowercase hexadecimal) or `X` (uppercase hexadecimal). You can also add a `#` between `+` and `0` (see the exact position at the [Grammar](#grammar)) to display a **base prefix** before the number (i.e. `0b` for binary, `0o` for octal and `0x` for hexadecimal):
 ```typ
-#import "@preview/oxifmt:0.3.0": strfmt
+#import "@preview/oxifmt:1.0.0": strfmt
 
 #let s = strfmt("Bases (10, 2, 8, 16(l), 16(U):) {0} {0:b} {0:o} {0:x} {0:X} | W/ prefixes and modifiers: {0:#b} {0:+#09o} {0:_>+#9X}", 124)
 #assert.eq(s, "Bases (10, 2, 8, 16(l), 16(U):) 124 1111100 174 7c 7C | W/ prefixes and modifiers: 0b1111100 +0o000174 ____+0x7C")
@@ -186,7 +186,7 @@ Some examples:
 
 - **Picking float precision (right-extending with zeroes):** Add, at the end of the format (just before the spec type (such as `?`), if there's any), either `.precision` (hardcoded, e.g. `.8` for 8 decimal digits) or `.parameter$` (taking the precision value from the specified parameter, like with `width`):
 ```typ
-#import "@preview/oxifmt:0.3.0": strfmt
+#import "@preview/oxifmt:1.0.0": strfmt
 
 #let s = strfmt("{0:.8} {0:.2$} {0:.potato$}", 1.234, 0, 2, potato: 5)
 #assert.eq(s, "1.23400000 1.23 1.23400")
@@ -194,7 +194,7 @@ Some examples:
 
 - **Scientific notation:** Use `e` (lowercase) or `E` (uppercase) as specifier types (can be combined with precision):
 ```typ
-#import "@preview/oxifmt:0.3.0": strfmt
+#import "@preview/oxifmt:1.0.0": strfmt
 
 #let s = strfmt("{0:e} {0:E} {0:+.9e} | {1:e} | {2:.4E}", 124.2312, 50, -0.02)
 #assert.eq(s, "1.242312e2 1.242312E2 +1.242312000e2 | 5e1 | -2.0000E-2")
@@ -206,7 +206,7 @@ Oxifmt has some additional formatting options laid on top of Rust's, listed belo
 
 - **Customizing the decimal separator on floats:** Just specify `fmt-decimal-separator: ","` (comma as an example):
 ```typ
-#import "@preview/oxifmt:0.3.0": strfmt
+#import "@preview/oxifmt:1.0.0": strfmt
 
 #let s = strfmt("{0} {0:.6} {0:.5e}", 1.432, fmt-decimal-separator: ",")
 #assert.eq(s, "1,432 1,432000 1,43200e0")
@@ -214,7 +214,7 @@ Oxifmt has some additional formatting options laid on top of Rust's, listed belo
 
 - **Displaying thousands separators on numbers:** Specify `fmt-thousands-separator: "_"` (underscore as an example - the default is `""` which disables the feature):
 ```typ
-#import "@preview/oxifmt:0.3.0": strfmt
+#import "@preview/oxifmt:1.0.0": strfmt
 
 #let s = strfmt("{}", 20000, fmt-thousands-separator: "_")
 #assert.eq(s, "20_000")
@@ -222,10 +222,18 @@ Oxifmt has some additional formatting options laid on top of Rust's, listed belo
 
 - **Customizing the distance between thousands separators:** Specify `fmt-thousands-count: 2` (2 as an example - the default is 3):
 ```typ
-#import "@preview/oxifmt:0.3.0": strfmt
+#import "@preview/oxifmt:1.0.0": strfmt
 
 #let s = strfmt("{}", 20000, fmt-thousands-count: 2, fmt-thousands-separator: "_")
 #assert.eq(s, "2_00_00")
+```
+
+- **Variable distances between thousands separators:** Specify `fmt-thousands-count: (3, 2)`, such that the rightmost (first) thousand will have 3 digits, then the second from the right will have 2 digits, and any further ones will have 2 digits as well (last group size is repeated):
+```typ
+#import "@preview/oxifmt:1.0.0": strfmt
+
+#let s = strfmt("{}", 1000000, fmt-thousands-count: (3, 2), fmt-thousands-separator: ",")
+#assert.eq(s, "10,00,000")
 ```
 
 ### Grammar
@@ -263,6 +271,20 @@ typst c strfmt-tests.typ --root ..
 The tests succeeded if you received no error messages from the last command (please ensure you're using a supported Typst version).
 
 ## Changelog
+
+### v1.0.0
+
+- **Breaking change:** Replacement names can no longer contain braces for consistency with Rust. ([Issue #17](https://github.com/PgBiel/typst-oxifmt/issues/17))
+  - That is, `{a {{ b}` and `{a }} b}` are now errors.
+  - Braces inside replacement names cannot be escaped, and `}` ends the name eagerly.
+  - Leads to less apparent ambiguity in some cases, and is also what Rust does.
+- **Breaking change:** Private symbols are now hidden. This package's entrypoint now only exports the `strfmt` function. ([PR #26](https://github.com/PgBiel/typst-oxifmt/pull/26))
+  - Technically not a breaking change as these weren't intended for public usage, but worth giving some attention to anyway.
+- Added variably-sized thousands for insertion of separators through `fmt-thousands-count: (group 1 size, group 2 size, ..., remaining group sizes)`. This may be useful for certain numbering systems used in India. ([Issue #21](https://github.com/PgBiel/typst-oxifmt/issues/21))
+  - For instance, one may have a digit group of size 3 followed by any amount of size 2 groups using `strfmt("1000000", fmt-thousands-count: (3, 2), fmt-thousands-count: ",")`, which outputs `10,00,000` (note that groups go from right to left, similarly to the numbers themselves).
+- Fixed an inconsistency with Rust where `{` and `}` would not be valid padding characters in format specifiers. The following is now valid: `{:{<5}` i.e. pad to 5 characters to the left with `{` (similarly for `}`). ([Issue #28](https://github.com/PgBiel/typst-oxifmt/issues/28))
+- Fixed an inconsistency with Rust where center-aligned padding could result in more than the specified width as padding was forced to be equal on both sides for perfect centering. Now, `strfmt("{:_^4}", "a")` will output `"_a__"` (exactly 4 characters, even if not perfectly centered) instead of `"__a__"` (5 characters). ([Issue #29](https://github.com/PgBiel/typst-oxifmt/issues/29))
+- Fixed a bug with scientific notation conversion for fixed-point `decimal` where certain digits would not be displayed. ([Issue #23](https://github.com/PgBiel/typst-oxifmt/issues/23))
 
 ### v0.3.0
 
