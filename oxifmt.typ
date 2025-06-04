@@ -88,6 +88,8 @@
   // -- parsing state --
   let current-fmt-span = none
   let current-fmt-name = none
+  // if we're at {abc:|, i.e. right after a colon in {}
+  let last-was-fmt-colon = false
   // if the last character was an unescaped {
   let last-was-lbracket = false
   // if the last character was an unescaped }
@@ -116,6 +118,7 @@
   // -- parse loop --
   let last-i = none
   let i = 0
+  let code-i = 0
   for character in codepoints {
     if character == "{" {
       // double l-bracket = escape
@@ -138,11 +141,19 @@
         // indicate we just started a span
         // in case it is escaped right afterwards
         last-was-lbracket = true
+      } else if last-was-fmt-colon and codepoints.len() > code-i + 1 and codepoints.at(code-i + 1) in ("<", "^", ">") {
+        // don't error on mid-span { if this { might be used for padding
+        // 'escape' it right away
+        // e.g. {a:{<5} => formats "bc" as "{{{bc"
+        current-fmt-name += character
+        last-was-lbracket = false
       } else {
         // if in the middle of a larger span ({ ... { <-):
         // error
         excessive-lbracket()
       }
+
+      last-was-fmt-colon = false
     } else if character == "}" {
       last-was-lbracket = false
       if current-fmt-span == none {
@@ -154,11 +165,18 @@
           // in case this is an escaped }
           last-was-rbracket = true
         }
+      } else if last-was-fmt-colon and codepoints.len() > code-i + 1 and codepoints.at(code-i + 1) in ("<", "^", ">") {
+        // don't close span with } if this } might be used for padding
+        // e.g. {a:}<5} => formats "bc" as "}}}bc"
+        current-fmt-name += character
+        last-was-rbracket = false
       } else {
         // { ... } <--- ok, close the previous span
         // Do this eagerly, escaping } inside { ... } is invalid
         (result, current-fmt-span, current-fmt-name) = write-format-span(i, result, current-fmt-span, current-fmt-name)
       }
+
+      last-was-fmt-colon = false
     } else {
       if last-was-rbracket {
         if current-fmt-span == none {
@@ -169,9 +187,13 @@
           panic("String formatter error: internal error: invalid right bracket state")
         }
       }
-      // {abc <--- add character to the format name
-      if current-fmt-name != none {
+
+      if current-fmt-name == none {
+        last-was-fmt-colon = false
+      } else {
+        // {abc <--- add character to the format name
         current-fmt-name += character
+        last-was-fmt-colon = character == ":"
       }
       last-was-lbracket = false
       last-was-rbracket = false
@@ -179,12 +201,14 @@
 
     last-i = i
     i += character.len() // index must be in bytes, and a UTF-8 codepoint can have more than one byte
+    code-i += 1
   }
   // { ...
   if current-fmt-span != none {
     if last-was-rbracket {
       // ... } <--- ok, close span
       (result, current-fmt-span, current-fmt-name) = write-format-span(last-i, result, current-fmt-span, current-fmt-name)
+      last-was-fmt-colon = false
     } else {
       // {abcd| <--- string ended with unclosed span
       missing-rbracket()

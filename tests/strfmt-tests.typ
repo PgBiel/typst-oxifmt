@@ -179,6 +179,17 @@
   assert.eq(strfmt("{{{}}}", 1), "{1}")
   assert.eq(strfmt("{{"), "{")
   assert.eq(strfmt("}}"), "}")
+
+  // Issue #28: pad with {} inside :
+  assert.eq(strfmt("{:}>4}", "a"), "}}}a")
+  assert.eq(strfmt("{:}^4}", "a"), "}}a}}")
+  assert.eq(strfmt("{:}<4}", "a"), "a}}}")
+  assert.eq(strfmt("{:{>4}", "a"), "{{{a")
+  assert.eq(strfmt("{:{^4}", "a"), "{{a{{")
+  assert.eq(strfmt("{:{<4}", "a"), "a{{{")
+  assert.eq(strfmt("{:{^}", "a"), "a")
+  assert.eq(strfmt("{:}^}", "a"), "a")
+  assert.eq(strfmt("{:}}}", "a"), "a}")
 }
 // DOC TESTS
 #{
