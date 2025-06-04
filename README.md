@@ -82,7 +82,7 @@ You can use `{:spec}` to customize your output. See the Rust docs linked above f
     - For strings, `?` (and thus `repr()`) has the effect of printing them with double quotes. For floats, this ensures a `.0` appears after it, even if it doesn't have decimal digits. For integers, this doesn't change anything. Finally, for labels, the `<label>` (with `?`) is printed as `<label>` instead of `label`.
     - **TIP:** Prefer to always use `?` when you're inserting something that isn't a string, number or label, in order to ensure consistent results even if the library eventually changes the non-`?` representation.
 - After the `:`, add e.g. `_<8` to align the string to the left, padding it with as many `_`s as necessary for it to be at least `8` characters long (for example). Replace `<` by `>` for right alignment, or `^` for center alignment. (If the `_` is omitted, it defaults to ' ' (aligns with spaces).)
-    - If you prefer to specify the minimum width (the `8` there) as a separate argument to `strfmt` instead, you can specify `argument$` in place of the width, which will extract it from the integer at `argument`. For example, `_^3$` will center align the output with `_`s, where the minimum width desired is specified by the fourth positional argument (index `3`), as an integer. This means that a call such as `strfmt("{:_^3$}", 1, 2, 3, 4)` would produce `"__1__"`, as `3$` would evaluate to `4` (the value at the fourth positional argument/index `3`). Similarly, `named$` would take the width from the argument with name `named`, if it is an integer (otherwise, error).
+    - If you prefer to specify the minimum width (the `8` there) as a separate argument to `strfmt` instead, you can specify `argument$` in place of the width, which will extract it from the integer at `argument`. For example, `_^3$` will center align the output with `_`s, where the minimum width desired is specified by the fourth positional argument (index `3`), as an integer. This means that a call such as `strfmt("{v:_^3$}", 1, 2, 3, 4, v: 88)` would produce `"_88_"`, as `3$` would evaluate to `4` (the value at the fourth positional argument/index `3`). Similarly, `named$` would take the width from the argument with name `named`, if it is an integer (otherwise, error).
 - **For numbers:**
     - Specify `+` after the `:` to ensure zero or positive numbers are prefixed with `+` before them (instead of having no sign). `-` is also accepted but ignored (negative numbers always specify their sign anyways).
     - Use something like `:09` to add zeroes to the left of the number until it has at least 9 digits / characters.
@@ -147,7 +147,7 @@ Some examples:
 #import "@preview/oxifmt:0.3.0": strfmt
 
 #let s = strfmt("Left5 {:-<5}, Right6 {:=>6}, Center10 {centered: ^10?}, Left3 {tleft:_<3}", "xx", 539, tleft: "okay", centered: [a])
-#assert.eq(s, "Left5 xx---, Right6 ===539, Center10     [a]    , Left3 okay")
+#assert.eq(s, "Left5 xx---, Right6 ===539, Center10    [a]    , Left3 okay")
 // note how 'okay' didn't suffer any padding at all (it already had at least the desired total width).
 ```
 

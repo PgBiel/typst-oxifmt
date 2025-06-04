@@ -645,8 +645,10 @@ parameter := argument '$'
       } else if align == right {
         replacement = (fill * width-diff) + replacement
       } else if align == center {
-        let width-fill = fill * (calc.ceil(float(width-diff) / 2))
-        replacement = width-fill + replacement + width-fill
+        let half-width = calc.quo(width-diff, 2)
+        let left-fill = fill * half-width // floor div
+        let right-fill = fill * (half-width + calc.rem(width-diff, 2)) // ceil div (if adding odd fill, add 1 to the right)
+        replacement = left-fill + replacement + right-fill
       }
     }
   }
