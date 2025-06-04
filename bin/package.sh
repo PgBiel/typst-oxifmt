@@ -9,7 +9,7 @@ orig_dir="$(realpath "$(dirname "$0")/..")"
 dest_dir="$1/packages/preview/oxifmt/${version}"
 mkdir -p "${dest_dir}"
 IFS=$' '
-for file in LICENSE LICENSE-MIT LICENSE-APACHE README.md oxifmt.typ typst.toml
+for file in LICENSE LICENSE-MIT LICENSE-APACHE README.md oxifmt.typ lib.typ typst.toml
 do
     cp "${orig_dir}/${file}" -t "${dest_dir}"
 done
