@@ -272,7 +272,9 @@ The tests succeeded if you received no error messages from the last command (ple
 
 ## Changelog
 
-### v1.0.0
+### v1.0.0 (2025-06-04)
+
+`oxifmt` is two years old!
 
 - **Breaking change:** Replacement names can no longer contain braces for consistency with Rust. ([Issue #17](https://github.com/PgBiel/typst-oxifmt/issues/17))
   - That is, `{a {{ b}` and `{a }} b}` are now errors.
@@ -286,7 +288,7 @@ The tests succeeded if you received no error messages from the last command (ple
 - Fixed an inconsistency with Rust where center-aligned padding could result in more than the specified width as padding was forced to be equal on both sides for perfect centering. Now, `strfmt("{:_^4}", "a")` will output `"_a__"` (exactly 4 characters, even if not perfectly centered) instead of `"__a__"` (5 characters). ([Issue #29](https://github.com/PgBiel/typst-oxifmt/issues/29))
 - Fixed a bug with scientific notation conversion for fixed-point `decimal` where certain digits would not be displayed. ([Issue #23](https://github.com/PgBiel/typst-oxifmt/issues/23))
 
-### v0.3.0
+### v0.3.0 (2025-05-27)
 
 - **Breaking change:** Named replacements prefixed with `fmt-` are now an error. Those are reserved for future `oxifmt` options. ([Issue #15](https://github.com/PgBiel/typst-oxifmt/issues/15))
   - For example, instead of `strfmt("{fmt-x}", fmt-x: 10)`, write `strfmt("{_fmt-x}, _fmt-x: 10")` instead (or some other name with a different prefix).
@@ -301,13 +303,13 @@ The tests succeeded if you received no error messages from the last command (ple
   - However, this was only triggered when a very rare formatting option was used (dynamic precision specifiers, which have a dollar sign `$`, e.g. `{:.prec$}`), so existing code is unlikely to be affected. Still a good idea to upgrade, though.
 - Fixed exponential notation formatting with very large numbers. Note that they might need rounding to look good (e.g. `strfmt("{:.2e}", number)` instead of just `{:e}`), but they will no longer cause an error. ([Issue #16](https://github.com/PgBiel/typst-oxifmt/issues/16))
 
-### v0.2.1
+### v0.2.1 (2024-05-08)
 
 - Fixed formatting of UTF-8 strings. Before, strings with multi-byte UTF-8 codepoints would cause formatting inconsistencies or even crashes. ([Issue #6](https://github.com/PgBiel/typst-oxifmt/issues/6))
 - Fixed an inconsistency in negative number formatting. Now, it will always print a regular hyphen (e.g. '-2'), which is consistent with Rust's behavior; before, it would occasionally print a minus sign instead (as observed in a comment to [Issue #4](https://github.com/PgBiel/typst-oxifmt/issues/4)).
 - Added compatibility with Typst 0.8.0's new type system.
 
-### v0.2.0
+### v0.2.0 (2023-08-02)
 
 - The package's name is now `oxifmt`!
 - `oxifmt:0.2.0` is now available through Typst's Package Manager! You can now write `#import "@preview/oxifmt:0.2.0": strfmt` to use the library.
@@ -315,7 +317,7 @@ The tests succeeded if you received no error messages from the last command (ple
 - Fixed negative numbers being formatted with two minus signs.
 - Fixed custom precision of floats not working when they are exact integers.
 
-### v0.1.0
+### v0.1.0 (2023-06-04)
 
 - Initial release, added `strfmt`.
 
