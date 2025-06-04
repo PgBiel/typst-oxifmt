@@ -17,8 +17,8 @@ A few extras (beyond the Rust-like syntax) will be added over time, though (feel
 // "if exp > 100 { true }"
 #strfmt("if {var} > {num} {{ true }}", var: "exp", num: 100)
 
-// "1.10e2 meters"
-#strfmt("{:.2e} meters", 110.0)
+// "1.10e2 meters (**wow**)"
+#strfmt("{:.2e} meters ({:*^7})", 110.0, "wow")
 
 // "20_000 players have more than +002,300 points."
 #strfmt(
