@@ -118,6 +118,7 @@
   // -- parse loop --
   let last-i = none
   let i = 0
+  let code-i = 0
   for character in codepoints {
     if character == "{" {
       // double l-bracket = escape
@@ -128,7 +129,6 @@
           // outside a span ({...} {{ <-) => emit an 'escaped' token
           current-fmt-span = none  // cancel this span
           current-fmt-name = none
-          fmt-name-just-had-colon = false
           result.push((escape: (escaped: "{", span: (last-i, i + 1))))
         } else {
           // { ... :{{| <--- excessive { not used for padding
@@ -138,22 +138,23 @@
         // begin span
         current-fmt-span = (i, none)
         current-fmt-name = ""
-        fmt-name-just-had-colon = false
 
         // indicate we just started a span
         // in case it is escaped right afterwards
         last-was-lbracket = true
-      } else if fmt-name-just-had-colon {
-        // delay erroring on mid-span { if this { might be used for padding
+      } else if fmt-name-just-had-colon and codepoints.len() > code-i + 1 and codepoints.at(code-i + 1) in ("<", "^", ">") {
+        // don't error on mid-span { if this { might be used for padding
+        // 'escape' it right away
         // e.g. {a:{<5} => formats "bc as "{{{bc"
         current-fmt-name += character
-        fmt-name-just-had-colon = false
-        last-was-lbracket = true
+        last-was-lbracket = false
       } else {
         // if in the middle of a larger span ({ ... { <-):
         // error
         excessive-lbracket()
       }
+
+      fmt-name-just-had-colon = false
     } else if character == "}" {
       last-was-lbracket = false
       if current-fmt-span == none {
@@ -165,26 +166,18 @@
           // in case this is an escaped }
           last-was-rbracket = true
         }
-      } else if fmt-name-just-had-colon {
-        // delay closing span with } if this } might be used for padding
+      } else if fmt-name-just-had-colon and codepoints.len() > code-i + 1 and codepoints.at(code-i + 1) in ("<", "^", ">") {
+        // don't close span with } if this } might be used for padding
         // e.g. {a:}<5} => formats "bc" as "}}}bc"
         current-fmt-name += character
-        fmt-name-just-had-colon = false
-        last-was-rbracket = true
-      } else if last-was-rbracket { // can only get here after a colon
-        // { ... :}} <--- excessive } not used for padding, close before
-        // ignore the last }
-        current-fmt-name = current-fmt-name.slice(0, current-fmt-name.len() - 1)
-        // stop the span here
-        (result, current-fmt-span, current-fmt-name) = write-format-span(last-i, result, current-fmt-span, current-fmt-name)
-        fmt-name-just-had-colon = false
-        last-was-rbracket = true
+        last-was-rbracket = false
       } else {
         // { ... } <--- ok, close the previous span
         // Do this eagerly, escaping } inside { ... } is invalid
         (result, current-fmt-span, current-fmt-name) = write-format-span(i, result, current-fmt-span, current-fmt-name)
-        fmt-name-just-had-colon = false
       }
+
+      fmt-name-just-had-colon = false
     } else {
       if last-was-lbracket and current-fmt-span.first() != last-i and character not in ("<", "^", ">") {
         // { ... :{} <--- excessive { not used for padding
@@ -199,8 +192,11 @@
           excessive-rbracket()
         }
       }
-      // {abc <--- add character to the format name
-      if current-fmt-name != none {
+
+      if current-fmt-name == none {
+        fmt-name-just-had-colon = false
+      } else {
+        // {abc <--- add character to the format name
         current-fmt-name += character
         fmt-name-just-had-colon = character == ":"
       }
@@ -210,6 +206,7 @@
 
     last-i = i
     i += character.len() // index must be in bytes, and a UTF-8 codepoint can have more than one byte
+    code-i += 1
   }
   // { ...
   if current-fmt-span != none {
