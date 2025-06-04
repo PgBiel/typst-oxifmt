@@ -17,7 +17,7 @@
   // assert.eq(strfmt("a{b}}b}", ..("b}b": 5)), "a5")
 
   // test 0 prefix with numbers, but also using 0 as a non-numeric affix
-  assert.eq(strfmt("{:08}|{0:0<8}|{0:0>8}|{0:0^8}", 120), "00000120|12000000|00000120|000120000")
+  assert.eq(strfmt("{:08}|{0:0<8}|{0:0>8}|{0:0^8}", 120), "00000120|12000000|00000120|00120000")
 
   // test other kinds of affixes / fills and alignments
   assert.eq(strfmt("{:a>8}, {:^20.10}, {:+05.4}, {:07}, {other:06?}", "b", 5.5, 11, -4, other: -30.0), "aaaaaaab,     5.5000000000    , +0011, -000004, -030.0")
@@ -182,14 +182,27 @@
 
   // Issue #28: pad with {} inside :
   assert.eq(strfmt("{:}>4}", "a"), "}}}a")
-  assert.eq(strfmt("{:}^4}", "a"), "}}a}}")
+  assert.eq(strfmt("{:}^4}", "a"), "}a}}")
   assert.eq(strfmt("{:}<4}", "a"), "a}}}")
   assert.eq(strfmt("{:{>4}", "a"), "{{{a")
-  assert.eq(strfmt("{:{^4}", "a"), "{{a{{")
+  assert.eq(strfmt("{:{^4}", "a"), "{a{{")
   assert.eq(strfmt("{:{<4}", "a"), "a{{{")
   assert.eq(strfmt("{:{^}", "a"), "a")
   assert.eq(strfmt("{:}^}", "a"), "a")
   assert.eq(strfmt("{:}}}", "a"), "a}")
+}
+// Issue #29: center alignment
+#{
+  assert.eq(strfmt("{:}^1}", "a"), "a")
+  assert.eq(strfmt("{:}^2}", "a"), "a}")
+  assert.eq(strfmt("{:}^3}", "a"), "}a}")
+  assert.eq(strfmt("{:}^4}", "a"), "}a}}")
+  assert.eq(strfmt("{:}^5}", "a"), "}}a}}")
+
+  assert.eq(strfmt("{:}>4}", "a"), "}}}a")
+  assert.eq(strfmt("{:}<4}", "a"), "a}}}")
+  assert.eq(strfmt("{:}>5}", "a"), "}}}}a")
+  assert.eq(strfmt("{:}<5}", "a"), "a}}}}")
 }
 // DOC TESTS
 #{
@@ -262,7 +275,7 @@
   }
   {
     let s = strfmt("Left5 {:_<5}, Right6 {:*>6}, Center10 {centered: ^10?}, Left3 {tleft:_<3}", "xx", 539, tleft: "okay", centered: [a])
-    assert.eq(s, "Left5 xx___, Right6 ***539, Center10     [a]    , Left3 okay")
+    assert.eq(s, "Left5 xx___, Right6 ***539, Center10    [a]    , Left3 okay")
   }
   {
     let s = strfmt("Left-padded7 numbers: {:07} {:07} {:07} {3:07}", 123, -344, 44224059, 45.32)
